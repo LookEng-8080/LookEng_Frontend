@@ -160,7 +160,28 @@ export function createEyeSvg(size = 1) {
     hl.setAttribute('cx', (18 + parseFloat(ox) * 0.3).toFixed(2));
     hl.setAttribute('cy', (17 + parseFloat(oy) * 0.3).toFixed(2));
   }
+
+  // 깜박이기 애니메이션
+  let blinkTimer = null;
+  function doBlink() {
+    sclera.style.transition = 'ry 0.07s ease-in';
+    sclera.style.ry = '0.5px';
+    setTimeout(() => {
+      sclera.style.transition = 'ry 0.11s ease-out';
+      sclera.style.ry = '16px';
+    }, 90);
+  }
+
+  svg.addEventListener('mouseenter', () => {
+    doBlink();
+    blinkTimer = setInterval(doBlink, 1800);
+  });
+
   function onMouseLeave() {
+    clearInterval(blinkTimer);
+    blinkTimer = null;
+    sclera.style.transition = 'ry 0.11s ease-out';
+    sclera.style.ry = '16px';
     iris.setAttribute('cx', '22'); iris.setAttribute('cy', '22');
     pupil.setAttribute('cx', '22'); pupil.setAttribute('cy', '22');
     hl.setAttribute('cx', '18'); hl.setAttribute('cy', '17');

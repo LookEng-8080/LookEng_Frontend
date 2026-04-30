@@ -81,7 +81,7 @@ export const auth = {
     if (role === 'ADMIN') {
       location.replace(`${getPrefix()}pages/admin/word-manage.html`);
     } else if (role === 'USER') {
-      location.replace(`${getPrefix()}pages/dashboard.html`);
+      location.replace(`${getPrefix()}pages/word-list.html`);
     }
   },
 };
