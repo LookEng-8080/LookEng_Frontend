@@ -1,0 +1,229 @@
+/* ── 로그인 페이지 ── */
+.login-page {
+  min-height: 100vh;
+  background: var(--color-navy-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 별 파티클 */
+.stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  animation: twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle {
+  from { opacity: 0.15; transform: scale(1); }
+  to   { opacity: 0.85; transform: scale(1.3); }
+}
+
+/* 중앙 카드 */
+.login-card {
+  position: relative;
+  z-index: 1;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-modal);
+  padding: 40px 36px 36px;
+  width: 100%;
+  max-width: 420px;
+  margin: 20px;
+}
+
+/* 로고 */
+.login-card__logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+/* 다크 네이비 앱 아이콘 배지 */
+.login-logo-badge {
+  width: 148px;
+  height: 148px;
+  border-radius: 34px;
+  background: linear-gradient(145deg, #2C4A7C 0%, #1A3258 50%, #0D1B33 100%);
+  box-shadow:
+    0 16px 48px rgba(13, 27, 51, 0.55),
+    0 4px 16px rgba(13, 27, 51, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    inset 0 -3px 10px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-logo-badge:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 20px 56px rgba(13, 27, 51, 0.6),
+    0 6px 20px rgba(13, 27, 51, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -3px 10px rgba(0, 0, 0, 0.25);
+}
+
+.login-logo-badge__gloss {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 44%;
+  background: linear-gradient(rgba(255, 255, 255, 0.11) 0%, transparent 100%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.login-logo-badge__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-en);
+  font-size: 23px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.logo-eye-slot {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.14em;
+}
+
+
+.login-card__tagline {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.01em;
+}
+
+/* 유형 탭 (학생 | 관리자) */
+.login-card__role-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 20px;
+  background: var(--color-bg);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.role-tab {
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.role-tab.is-active {
+  background: var(--color-surface);
+  color: var(--color-navy-dark);
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 기능 탭 (로그인 | 회원가입) */
+.login-card__func-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--color-bg);
+  margin-bottom: 24px;
+}
+
+.func-tab {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  cursor: pointer;
+}
+
+.func-tab.is-active {
+  color: var(--color-blue-primary);
+  border-bottom-color: var(--color-blue-primary);
+}
+
+/* 폼 */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  font-family: var(--font-ko);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px rgba(91, 127, 219, 0.15);
+}
+
+.form-group__error {
+  font-size: 0.78rem;
+  color: var(--color-danger);
+  min-height: 1em;
+}
+
+.btn--full { width: 100%; }
+
+.login-form__submit {
+  margin-top: 4px;
+}
+
+/* 로딩 상태 */
+.btn--loading {
+  pointer-events: none;
+  opacity: 0.7;
+}

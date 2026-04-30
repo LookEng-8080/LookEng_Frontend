@@ -56,16 +56,16 @@ export const AuthApi = {
    * POST /api/v1/auth/signup
    * @returns {{ success, message, data: { userId, email } }}
    */
-  signup(email, password) {
-    return request('POST', '/api/v1/auth/signup', { email, password });
+  signup(email, password, nickname) {
+    return request('POST', '/api/v1/auth/signup', { email, password, nickname });
   },
 
   /**
    * 관리자 회원가입
    * POST /api/v1/auth/admin/signup
    */
-  adminSignup(email, password) {
-    return request('POST', '/api/v1/auth/admin/signup', { email, password });
+  adminSignup(email, password, nickname) {
+    return request('POST', '/api/v1/auth/admin/signup', { email, password, nickname });
   },
 
   /**
