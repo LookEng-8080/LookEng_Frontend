@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LookEng — 단어장</title>
+  <link rel="stylesheet" href="../css/global.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/pages/word-list.css" />
+</head>
+<body>
+  <div class="layout">
+    <div class="layout__sidebar" id="sidebar"></div>
+
+    <main class="layout__main">
+      <!-- 헤더 -->
+      <div class="page-header">
+        <h1 class="page-title">단어장</h1>
+        <button class="btn btn--primary" id="addWordBtn" hidden>+ 새 단어 추가</button>
+      </div>
+
+      <!-- 학습 진도 바 -->
+      <div class="progress-section">
+        <span class="progress-section__label">학습 진도</span>
+        <div class="progress-bar">
+          <div class="progress-bar__fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <span class="progress-section__count" id="progressCount">암기완료 0 / 0</span>
+      </div>
+
+      <!-- 컨트롤 바 -->
+      <div class="controls">
+        <span id="totalCount" style="font-size:0.875rem;color:var(--color-text-secondary)"></span>
+        <select class="sort-select" id="sortSelect">
+          <option value="id,asc">기본순</option>
+          <option value="english,asc">알파벳 ↑</option>
+          <option value="english,desc">알파벳 ↓</option>
+        </select>
+      </div>
+
+      <!-- 단어 카드 그리드 -->
+      <div class="word-grid" id="wordGrid"></div>
+
+      <!-- 페이지네이션 -->
+      <div class="pagination-wrapper" id="pagination"></div>
+    </main>
+  </div>
+
+  <script type="module" src="../js/pages/word-list.js"></script>
+</body>
+</html>
