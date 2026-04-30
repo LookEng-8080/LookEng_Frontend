@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" width="220" height="60" role="img" aria-label="LookEng logo">
+  <defs>
+    <!-- 왼쪽 눈 홍채 그라데이션 -->
+    <radialGradient id="iris-left" cx="45%" cy="40%" r="50%">
+      <stop offset="0%"   stop-color="#5B7EA1"/>
+      <stop offset="40%"  stop-color="#3A6186"/>
+      <stop offset="70%"  stop-color="#2C4A6E"/>
+      <stop offset="100%" stop-color="#1B2F45"/>
+    </radialGradient>
+    <!-- 오른쪽 눈 홍채 그라데이션 -->
+    <radialGradient id="iris-right" cx="45%" cy="40%" r="50%">
+      <stop offset="0%"   stop-color="#5B7EA1"/>
+      <stop offset="40%"  stop-color="#3A6186"/>
+      <stop offset="70%"  stop-color="#2C4A6E"/>
+      <stop offset="100%" stop-color="#1B2F45"/>
+    </radialGradient>
+    <!-- 텍스트 그라데이션 (LOOkEng) -->
+    <linearGradient id="text-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#2C4A7C"/>
+      <stop offset="100%" stop-color="#5B7FDB"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ── 왼쪽 눈 (cx=16, cy=30) ── -->
+  <!-- 흰자 -->
+  <ellipse cx="16" cy="30" rx="14" ry="12" fill="#F0F0F0"/>
+  <!-- 홍채 -->
+  <circle  cx="16" cy="30" r="8.5" fill="url(#iris-left)"/>
+  <!-- 동공 -->
+  <circle  cx="16" cy="30" r="4"   fill="#0A0F18"/>
+  <!-- 하이라이트 -->
+  <ellipse cx="13" cy="27" rx="2.5" ry="2" fill="white" opacity="0.85"/>
+
+  <!-- ── 오른쪽 눈 (cx=42, cy=30) ── -->
+  <!-- 흰자 -->
+  <ellipse cx="42" cy="30" rx="14" ry="12" fill="#F0F0F0"/>
+  <!-- 홍채 -->
+  <circle  cx="42" cy="30" r="8.5" fill="url(#iris-right)"/>
+  <!-- 동공 -->
+  <circle  cx="42" cy="30" r="4"   fill="#0A0F18"/>
+  <!-- 하이라이트 -->
+  <ellipse cx="39" cy="27" rx="2.5" ry="2" fill="white" opacity="0.85"/>
+
+  <!-- ── 텍스트: "LOOkEng" ── -->
+  <!-- "LO" — 두 눈 왼쪽 포함 -->
+  <text x="62" y="42"
+        font-family="'Poppins', sans-serif"
+        font-weight="700"
+        font-size="28"
+        fill="url(#text-grad)"
+        letter-spacing="-0.5">LookEng</text>
+</svg>

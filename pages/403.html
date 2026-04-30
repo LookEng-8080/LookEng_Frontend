@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>403 — 접근 권한 없음 | LookEng</title>
+  <link rel="stylesheet" href="../css/global.css" />
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--color-bg);
+    }
+
+    .error-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      padding: 56px 48px;
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .error-card__code {
+      font-family: var(--font-en);
+      font-size: 5rem;
+      font-weight: 800;
+      color: var(--color-blue-primary);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .error-card__title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 8px;
+    }
+
+    .error-card__desc {
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .error-card__actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background var(--transition-fast), opacity var(--transition-fast);
+      text-decoration: none;
+    }
+    .btn--primary {
+      background: var(--color-blue-primary);
+      color: #fff;
+    }
+    .btn--primary:hover { background: var(--color-blue-hover); }
+    .btn--ghost {
+      background: transparent;
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+    .btn--ghost:hover { background: var(--color-bg); }
+
+    .eye-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-card">
+    <div class="eye-wrap" id="eyeContainer"></div>
+    <div class="error-card__code">403</div>
+    <div class="error-card__title">접근 권한이 없습니다</div>
+    <p class="error-card__desc">
+      이 페이지는 관리자 전용입니다.<br />
+      일반 사용자 계정으로는 접근할 수 없습니다.
+    </p>
+    <div class="error-card__actions">
+      <a href="./word-list.html" class="btn btn--primary">단어장으로 이동</a>
+      <a href="./login.html" class="btn btn--ghost">로그인 페이지로</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createEyeSvg } from '../js/utils.js';
+    const container = document.getElementById('eyeContainer');
+    if (container) {
+      container.appendChild(createEyeSvg(1.4));
+    }
+  </script>
+</body>
+</html>
