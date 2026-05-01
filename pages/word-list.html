@@ -15,7 +15,7 @@
     <main class="layout__main">
       <!-- 헤더 -->
       <div class="page-header">
-        <h1 class="page-title">단어장</h1>
+        <h1 class="page-title">단어장 <span class="page-title__hint">카드를 클릭하면 뜻을 볼 수 있어요</span></h1>
         <button class="btn btn--primary" id="addWordBtn" hidden>+ 새 단어 추가</button>
       </div>
 
@@ -32,9 +32,8 @@
       <div class="controls">
         <span id="totalCount" style="font-size:0.875rem;color:var(--color-text-secondary)"></span>
         <select class="sort-select" id="sortSelect">
-          <option value="id,asc">기본순</option>
-          <option value="english,asc">알파벳 ↑</option>
-          <option value="english,desc">알파벳 ↓</option>
+          <option value="english,asc">A → Z</option>
+          <option value="english,desc">Z → A</option>
         </select>
       </div>
 

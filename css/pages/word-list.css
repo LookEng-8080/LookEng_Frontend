@@ -47,12 +47,26 @@
   justify-content: center;
 }
 
-.sidebar__brand-text {
+.sidebar__brand-logo {
+  display: flex;
+  align-items: center;
   font-family: var(--font-en);
   font-size: 1.1rem;
   font-weight: 800;
   color: #fff;
   letter-spacing: -0.3px;
+  gap: 1px;
+}
+
+.sidebar__brand-l,
+.sidebar__brand-keng {
+  line-height: 1;
+}
+
+.sidebar__brand-eye {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.1em;
 }
 
 .sidebar__nav {
@@ -124,6 +138,14 @@
   font-size: 1.375rem;
   font-weight: 700;
   color: var(--color-text-primary);
+}
+
+.page-title__hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  margin-left: 8px;
+  vertical-align: middle;
 }
 
 /* 진도 섹션 */
@@ -238,6 +260,7 @@
 .word-card__front {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
+  padding-right: 44px;
 }
 
 .word-card__front-top {

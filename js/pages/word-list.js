@@ -13,7 +13,7 @@ if (auth.isAdmin()) {
 // ── 상태 ─────────────────────────────────────────────────────
 const PAGE_SIZE = 20;
 let currentPage = 0;
-let currentSort = 'id,asc';
+let currentSort = 'english,asc';
 let totalElements = 0;
 
 // ── 진도 바 ──────────────────────────────────────────────────
@@ -70,8 +70,8 @@ function renderWordGrid(words) {
 }
 
 function buildWordCard(word) {
-  const posClass = getPosClass(word.pronunciation);
-  const posLabel = word.pronunciation || '';
+  const posClass = getPosClass(word.partOfSpeech);
+  const posLabel = word.partOfSpeech || '';
   const memorized = localStorage.getItem(`memorized_${word.id}`) === '1';
   const memorizedClass = memorized ? 'word-card-wrapper--memorized' : '';
   const sentence = word.exampleSentence ? escapeHtml(word.exampleSentence) : '';
@@ -85,10 +85,9 @@ function buildWordCard(word) {
             ${posLabel ? `<span class="pos-badge ${posClass}">${escapeHtml(posLabel)}</span>` : ''}
           </div>
           <p class="word-card__sentence">${sentence}</p>
-          <span class="word-card__flip-hint">클릭하여 뜻 보기 →</span>
         </div>
         <div class="word-card__face word-card__back">
-          <p class="word-card__meaning">${escapeHtml(word.meaning)}</p>
+          <p class="word-card__meaning">${escapeHtml(word.korean)}</p>
         </div>
       </div>
       <button class="memorize-btn" data-word-id="${word.id}" title="암기완료 토글">✓</button>

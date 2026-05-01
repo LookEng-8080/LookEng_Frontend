@@ -267,8 +267,12 @@ export function buildSidebar(activeMenu) {
   sidebar.innerHTML = `
     <div class="sidebar__header">
       <a href="${prefix}dashboard.html" class="sidebar__brand">
-        <div class="sidebar__logo" id="sidebarLogoEyes"></div>
-        <span class="sidebar__brand-text">LookEng</span>
+        <div class="sidebar__brand-logo">
+          <span class="sidebar__brand-l">L</span>
+          <span class="sidebar__brand-eye" id="sidebarLogoEye1"></span>
+          <span class="sidebar__brand-eye" id="sidebarLogoEye2"></span>
+          <span class="sidebar__brand-keng">kEng</span>
+        </div>
       </a>
     </div>
     <nav class="sidebar__nav">${navHTML}</nav>
@@ -284,12 +288,11 @@ export function buildSidebar(activeMenu) {
     </div>
   `;
 
-  // 사이드바 로고 눈 렌더링 (작은 크기)
-  const logoContainer = document.getElementById('sidebarLogoEyes');
-  if (logoContainer) {
-    const eye = createEyeSvg(0.38);
-    logoContainer.appendChild(eye);
-  }
+  // 사이드바 로고 눈 렌더링 (작은 크기, 2개)
+  const eye1 = document.getElementById('sidebarLogoEye1');
+  const eye2 = document.getElementById('sidebarLogoEye2');
+  if (eye1) eye1.appendChild(createEyeSvg(0.38));
+  if (eye2) eye2.appendChild(createEyeSvg(0.38));
 
   // 로그아웃 이벤트
   document.getElementById('logoutBtn')?.addEventListener('click', async () => {
