@@ -43,7 +43,7 @@ function renderTable(records) {
 
   tbody.innerHTML = records.map(r => `
     <tr>
-      <td>${formatDate(r.finishedAt)}</td>
+      <td>${formatDate(r.startedAt)}</td>
       <td>${quizTypeLabel[r.quizType] ?? r.quizType}</td>
       <td>${r.totalCount}문제</td>
       <td><strong>${r.accuracy}%</strong></td>

@@ -151,8 +151,8 @@ export const TestApi = {
    * POST /api/v1/test/sessions/:sessionId/answers
    * @returns {{ success, message, data: { sessionId, currentIndex, totalCount, isCorrect, isFinished, currentQuestion } }}
    */
-  submitAnswer(sessionId, wordId, userAnswer) {
-    return request('POST', `/api/v1/test/sessions/${sessionId}/answers`, { wordId, userAnswer });
+  submitAnswer(sessionId, wordId, userInput) {
+    return request('POST', `/api/v1/test/sessions/${sessionId}/answers`, { wordId, userInput });
   },
 
   /**
