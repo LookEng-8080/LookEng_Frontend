@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LookEng — 테스트</title>
+  <link rel="stylesheet" href="../css/global.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/pages/test.css" />
+</head>
+<body>
+  <div class="topbar-layout">
+    <header class="topbar">
+      <span class="topbar__title">단어 퀴즈</span>
+      <div class="topbar__right">
+        <span id="todayDate"></span>
+        <button class="btn btn--ghost btn--sm" id="logoutBtn">로그아웃</button>
+      </div>
+    </header>
+
+    <main class="topbar-layout__main">
+
+      <!-- 설정 화면 -->
+      <section id="setupView">
+        <div class="setup-card">
+          <h2 class="setup-card__title">퀴즈 설정</h2>
+
+          <div class="setup-field">
+            <div class="setup-field__label">
+              <span>문제 수</span>
+              <span class="setup-field__value" id="totalCountDisplay">10</span>
+            </div>
+            <input type="range" class="slider" id="totalCountSlider"
+                   min="5" max="30" value="10" step="5" />
+          </div>
+
+          <div class="setup-field">
+            <div class="setup-field__label">
+              <span>퀴즈 유형</span>
+            </div>
+            <div class="chip-group">
+              <button class="chip chip--active" data-type="SHORT_ANSWER">주관식</button>
+              <button class="chip" data-type="MULTIPLE_CHOICE">객관식</button>
+            </div>
+          </div>
+
+          <button class="btn btn--primary btn--full" id="startBtn" style="margin-top:8px">시작하기</button>
+        </div>
+      </section>
+
+      <!-- 진행 화면 -->
+      <section id="quizView" hidden>
+        <div class="quiz-header">
+          <button class="btn btn--ghost btn--sm" id="quitBtn">그만하기</button>
+          <span class="quiz-progress-text" id="progressText">1 / 10</span>
+        </div>
+        <div class="quiz-progress-bar">
+          <div class="quiz-progress-bar__fill" id="progressFill" style="width: 0%"></div>
+        </div>
+
+        <!-- 영단어 카드 -->
+        <div class="quiz-word-card">
+          <span class="quiz-word-card__pos" id="qPos"></span>
+          <h2 class="quiz-word-card__word en" id="qWord"></h2>
+          <p class="quiz-word-card__sentence" id="qSentence"></p>
+        </div>
+
+        <!-- 주관식 입력 -->
+        <div id="shortAnswerArea">
+          <p class="quiz-instruction">영단어의 한글 뜻을 입력하세요</p>
+          <div class="quiz-answer-row">
+            <input type="text" class="input" id="answerInput"
+                   placeholder="예: 포기하다, 버리다" autocomplete="off" />
+            <button class="btn btn--primary" id="confirmBtn">확인</button>
+          </div>
+        </div>
+
+        <!-- 객관식 보기 -->
+        <div id="multipleChoiceArea" hidden>
+          <p class="quiz-instruction">뜻으로 알맞은 것을 고르세요</p>
+          <div class="quiz-choices" id="choicesGrid"></div>
+        </div>
+
+        <!-- 하단 도트 인디케이터 -->
+        <div class="quiz-dots" id="quizDots"></div>
+      </section>
+
+      <!-- 결과 화면 -->
+      <section id="resultView" hidden>
+        <div class="result-card">
+          <p class="result-card__title">퀴즈 결과</p>
+          <div class="result-card__accuracy" id="resultAccuracy">0%</div>
+          <p class="result-card__summary" id="resultSummary"></p>
+
+          <div class="result-stats">
+            <div class="result-stat">
+              <span class="result-stat__label">맞은 문제</span>
+              <span class="result-stat__value" id="resultCorrect">-</span>
+            </div>
+            <div class="result-stat">
+              <span class="result-stat__label">소요 시간</span>
+              <span class="result-stat__value" id="resultDuration">-</span>
+            </div>
+          </div>
+
+          <div id="wrongAnswerSection" hidden>
+            <p class="result-wrong-title">오답 목록</p>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>영단어</th>
+                  <th>내 답</th>
+                  <th>정답</th>
+                </tr>
+              </thead>
+              <tbody id="wrongAnswerBody"></tbody>
+            </table>
+          </div>
+
+          <div class="result-actions">
+            <button class="btn btn--ghost" id="retryBtn">다시 시작</button>
+            <a href="./word-list.html" class="btn btn--primary">단어장으로</a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script type="module" src="../js/pages/test.js"></script>
+</body>
+</html>
