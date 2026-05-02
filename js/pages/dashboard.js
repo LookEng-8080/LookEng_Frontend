@@ -72,7 +72,7 @@ function renderGrassCalendar(dateCounts) {
     // 월 라벨 처리
     if (currentDate.getDate() <= 7 && monthIndex !== currentMonth) {
       const weekIndex = Math.floor(i / 7);
-      // 🔥 셀(14px) + 여백(4px) = 18px 단위로 계산
+      //  셀(14px) + 여백(4px) = 18px 단위로 계산
       monthLabelsHTML += `<span class="grass-month-label" style="left: ${weekIndex * 18}px">${monthIndex}월</span>`;
       currentMonth = monthIndex;
     }
@@ -87,7 +87,7 @@ function renderGrassCalendar(dateCounts) {
     const isFuture = currentDate > today;
     const visibilityStyle = isFuture ? 'opacity: 0; pointer-events: none;' : '';
     
-    // 🔥 기본 title 속성 제거하고 커스텀 데이터 속성 주입
+    //  기본 title 속성 제거하고 커스텀 데이터 속성 주입
     gridHTML += `<div class="grass-cell" data-level="${level}" data-date="${dateString}" data-count="${count}" style="${visibilityStyle}"></div>`;
   }
 
@@ -117,11 +117,11 @@ function renderGrassCalendar(dateCounts) {
     ${legendHTML}
   `;
 
-  // 🔥 툴팁 이벤트 바인딩 실행
+  //  툴팁 이벤트 바인딩 실행
   bindTooltipEvents();
 }
 
-// 🔥 즉각적으로 반응하는 깃허브 스타일 툴팁 로직
+//  즉각적으로 반응하는 깃허브 스타일 툴팁 로직
 function bindTooltipEvents() {
   const wrapper = document.querySelector('.grass-calendar-wrapper');
   const tooltip = document.getElementById('grassTooltip');

@@ -23,7 +23,7 @@
   gap: 12px;
 }
 
-/* --- 🟢 잔디 캘린더 핵심 스타일 --- */
+/* ---  잔디 캘린더 핵심 스타일 --- */
 .learning-record-section {
   width: 100%;
 }
@@ -33,7 +33,7 @@
   overflow-x: auto;
   padding-bottom: 16px;
   display: flex;
-  justify-content: center; /* 🔥 넓은 화면에서 가운데 정렬로 균형감 줌 */
+  justify-content: center; 
   position: relative;
 }
 
@@ -75,12 +75,12 @@
 
 .grass-month-label { 
   position: absolute; 
-  white-space: nowrap; /* 🔥 글자 줄바꿈 방지 (5월 끝에 깨지던 현상 해결) */
+  white-space: nowrap; 
 }
 
 .grass-grid {
   display: grid;
-  grid-template-rows: repeat(7, 14px); /* 🔥 화면 비율에 맞게 14px로 적절히 키움 */
+  grid-template-rows: repeat(7, 14px); /*  화면 비율에 맞게 14px로 적절히 키움 */
   grid-auto-flow: column;
   gap: 4px; 
 }
@@ -115,7 +115,7 @@
   color: #64748B;
 }
 
-/* --- 💬 깃허브 스타일 커스텀 툴팁 --- */
+/* ---  깃허브 스타일 커스텀 툴팁 --- */
 .grass-tooltip {
   position: fixed;
   background: #24292f;
