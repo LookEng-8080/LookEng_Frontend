@@ -1,0 +1,48 @@
+/* css/pages/dashboard.css */
+
+/* 2단 그리드 레이아웃 */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.dashboard-grid__left,
+.dashboard-grid__right {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 1. 환영 카드 */
+.welcome-card { padding: 36px 40px; }
+.welcome-card__greeting { font-size: 0.9rem; color: var(--color-text-secondary); margin-bottom: 6px; }
+.welcome-card__title { font-size: 1.875rem; font-weight: 800; margin-bottom: 12px; color: var(--color-text-primary); }
+.welcome-card__subtitle { font-size: 0.9375rem; color: var(--color-text-secondary); margin-bottom: 28px; }
+.welcome-card__subtitle strong { color: var(--color-blue-primary); }
+
+.welcome-progress { margin-bottom: 28px; }
+.welcome-progress__header { display: flex; justify-content: space-between; font-size: 0.875rem; font-weight: 600; margin-bottom: 10px; }
+.welcome-progress__text { color: var(--color-blue-primary); }
+.welcome-actions { display: flex; gap: 12px; }
+
+/* 2. 단어장 마스터 진행도 */
+.master-progress-card { padding: 28px 32px; }
+.master-progress-card h2 { font-size: 1.125rem; font-weight: 700; margin-bottom: 20px; }
+.master-progress__header { display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 10px; font-weight: 600; color: var(--color-text-secondary); }
+.master-progress__count { color: var(--color-success); }
+.progress-bar__fill--success { background: linear-gradient(90deg, #10B981, #34D399); }
+
+/* 3. 등급 & 포인트 카드 */
+.grade-card { background: var(--color-navy-dark); color: #fff; padding: 32px; border-radius: var(--radius-lg); }
+.grade-stats { display: flex; justify-content: space-between; margin-bottom: 32px; }
+.grade-stat { display: flex; flex-direction: column; gap: 6px; }
+.grade-stat--right { text-align: right; }
+.grade-stat__label { font-size: 0.8125rem; color: rgba(255, 255, 255, 0.7); }
+.grade-stat__value { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+.streak-box { background: rgba(255, 255, 255, 0.08); border-radius: var(--radius); padding: 16px 20px; display: flex; gap: 16px; align-items: center; }
+.streak-box__icon { font-size: 2rem; }
+.streak-box__text strong { display: block; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+.streak-box__text p { font-size: 0.8125rem; color: rgba(255, 255, 255, 0.6); margin: 0; line-height: 1.4; }
