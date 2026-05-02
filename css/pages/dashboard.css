@@ -1,48 +1,172 @@
-/* css/pages/dashboard.css */
-
-/* 2단 그리드 레이아웃 */
 .dashboard-grid {
-  display: grid;
-  grid-template-columns: 1.8fr 1fr;
-  gap: 24px;
-  align-items: start;
-}
-
-.dashboard-grid__left,
-.dashboard-grid__right {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-/* 1. 환영 카드 */
-.welcome-card { padding: 36px 40px; }
-.welcome-card__greeting { font-size: 0.9rem; color: var(--color-text-secondary); margin-bottom: 6px; }
-.welcome-card__title { font-size: 1.875rem; font-weight: 800; margin-bottom: 12px; color: var(--color-text-primary); }
-.welcome-card__subtitle { font-size: 0.9375rem; color: var(--color-text-secondary); margin-bottom: 28px; }
-.welcome-card__subtitle strong { color: var(--color-blue-primary); }
+.section-title {
+  margin: 0 0 16px 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text, #333);
+}
 
-.welcome-progress { margin-bottom: 28px; }
-.welcome-progress__header { display: flex; justify-content: space-between; font-size: 0.875rem; font-weight: 600; margin-bottom: 10px; }
-.welcome-progress__text { color: var(--color-blue-primary); }
-.welcome-actions { display: flex; gap: 12px; }
+.welcome-card__title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0 0 24px 0;
+  color: #0F172A;
+}
 
-/* 2. 단어장 마스터 진행도 */
-.master-progress-card { padding: 28px 32px; }
-.master-progress-card h2 { font-size: 1.125rem; font-weight: 700; margin-bottom: 20px; }
-.master-progress__header { display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 10px; font-weight: 600; color: var(--color-text-secondary); }
-.master-progress__count { color: var(--color-success); }
-.progress-bar__fill--success { background: linear-gradient(90deg, #10B981, #34D399); }
+.dashboard-actions {
+  display: flex;
+  gap: 12px;
+}
 
-/* 3. 등급 & 포인트 카드 */
-.grade-card { background: var(--color-navy-dark); color: #fff; padding: 32px; border-radius: var(--radius-lg); }
-.grade-stats { display: flex; justify-content: space-between; margin-bottom: 32px; }
-.grade-stat { display: flex; flex-direction: column; gap: 6px; }
-.grade-stat--right { text-align: right; }
-.grade-stat__label { font-size: 0.8125rem; color: rgba(255, 255, 255, 0.7); }
-.grade-stat__value { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+/* --- 🟢 잔디 캘린더 핵심 스타일 --- */
+.learning-record-section {
+  width: 100%;
+}
 
-.streak-box { background: rgba(255, 255, 255, 0.08); border-radius: var(--radius); padding: 16px 20px; display: flex; gap: 16px; align-items: center; }
-.streak-box__icon { font-size: 2rem; }
-.streak-box__text strong { display: block; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
-.streak-box__text p { font-size: 0.8125rem; color: rgba(255, 255, 255, 0.6); margin: 0; line-height: 1.4; }
+.grass-calendar-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  display: flex;
+  justify-content: center; /* 🔥 넓은 화면에서 가운데 정렬로 균형감 줌 */
+  position: relative;
+}
+
+.grass-calendar-container {
+  display: inline-flex; 
+  gap: 8px;
+  align-items: flex-end;
+  padding-top: 10px;
+}
+
+.grass-day-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #94A3B8;
+  height: 122px; 
+  padding-bottom: 4px;
+}
+
+.grass-day-labels span { 
+  line-height: 14px; 
+}
+
+.grass-graph-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.grass-month-labels {
+  display: flex;
+  font-size: 0.75rem;
+  color: #94A3B8;
+  position: relative;
+  height: 16px;
+  width: 100%;
+}
+
+.grass-month-label { 
+  position: absolute; 
+  white-space: nowrap; /* 🔥 글자 줄바꿈 방지 (5월 끝에 깨지던 현상 해결) */
+}
+
+.grass-grid {
+  display: grid;
+  grid-template-rows: repeat(7, 14px); /* 🔥 화면 비율에 맞게 14px로 적절히 키움 */
+  grid-auto-flow: column;
+  gap: 4px; 
+}
+
+.grass-cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px; 
+  background-color: #EBEDF0;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.grass-cell:hover {
+  transform: scale(1.3);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  z-index: 10;
+  cursor: pointer;
+}
+
+.grass-cell[data-level="1"] { background-color: #9BE9A8; }
+.grass-cell[data-level="2"] { background-color: #40C463; }
+.grass-cell[data-level="3"] { background-color: #30A14E; }
+.grass-cell[data-level="4"] { background-color: #216E39; }
+
+.grass-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: #64748B;
+}
+
+/* --- 💬 깃허브 스타일 커스텀 툴팁 --- */
+.grass-tooltip {
+  position: fixed;
+  background: #24292f;
+  color: #fff;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease-in-out;
+  z-index: 1000;
+  white-space: nowrap;
+  transform: translate(-50%, -100%);
+  margin-top: -8px;
+}
+
+.grass-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #24292f transparent transparent transparent;
+}
+
+/* --- 기능 소개 박스 --- */
+.feature-guide-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.feature-card__title {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary, #4A90E2);
+}
+
+.feature-card__desc {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #64748B;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .feature-guide-section {
+    grid-template-columns: 1fr;
+  }
+}

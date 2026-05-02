@@ -1,12 +1,10 @@
-import { WordApi } from '../api.js';
+import { TestApi } from '../api.js';
 import { auth } from '../auth.js';
 import { showToast, buildSidebar } from '../utils.js';
 
-// 1. 인증 및 사이드바 렌더링 (팀장님처럼 파일 최상단에서 바로 실행!)
 auth.requireLogin();
-buildSidebar('dashboard'); 
+buildSidebar('dashboard');
 
-// 2. 사용자 이름 표시
 function renderUserName() {
   const email = auth.getEmail() || 'User@lookeng.com';
   const nameDisplay = document.getElementById('userName');
@@ -15,67 +13,148 @@ function renderUserName() {
   }
 }
 
-// 3. 로컬 저장소 단어 카운트
-function getMemorizedCount() {
-  return Object.keys(localStorage)
-    .filter(key => key.startsWith('memorized_'))
-    .length;
-}
-
-// 4. 등급 계산 로직
-function getGrade(memorizedCount) {
-  if (memorizedCount >= 40) return { level: 5, label: '마스터', emoji: '🏆', color: '#F59E0B' };
-  if (memorizedCount >= 30) return { level: 4, label: '플래티넘', emoji: '💎', color: '#5B7FDB' };
-  if (memorizedCount >= 20) return { level: 3, label: '골드', emoji: '🥇', color: '#FFD700' };
-  if (memorizedCount >= 10) return { level: 2, label: '실버', emoji: '🥈', color: '#9CA3AF' };
-  return { level: 1, label: '브론즈', emoji: '🥉', color: '#CD7F32' };
-}
-
-// 5. 화면(UI)에 데이터 업데이트
-function renderDashboardUI(memorizedCount, totalWords) {
-  const percent = totalWords === 0 ? 0 : Math.round((memorizedCount / totalWords) * 100);
-  
-  const elements = {
-    progressText: document.getElementById('progressText'),
-    progressFill: document.getElementById('progressFill'),
-    currentLevelText: document.getElementById('currentLevelText'),
-    gradeEmoji: document.getElementById('gradeEmoji'),
-    gradeLabel: document.getElementById('gradeLabel')
-  };
-
-  if (elements.progressText) elements.progressText.textContent = `${memorizedCount} / ${totalWords}`;
-  if (elements.progressFill) elements.progressFill.style.width = `${percent}%`;
-
-  const grade = getGrade(memorizedCount);
-  if (elements.currentLevelText) elements.currentLevelText.textContent = `Lv.${grade.level} (현재 외운 단어)`;
-  if (elements.gradeEmoji) elements.gradeEmoji.textContent = grade.emoji;
-  if (elements.gradeLabel) {
-    elements.gradeLabel.textContent = grade.label;
-    elements.gradeLabel.style.color = grade.color;
-  }
-}
-
-// 6. 데이터 로드 및 초기화
-async function initDashboard() {
+async function loadGrassCalendarData() {
   try {
-    const res = await WordApi.getList(0, 1);
+    const res = await TestApi.getHistory(0, 500);
     
     if (!res.success) {
-      showToast(res.message || '데이터를 불러오지 못했습니다.', 'error');
+      renderGrassCalendar({});
       return;
     }
 
-    const totalWords = res.data.totalElements;
-    const memorizedCount = getMemorizedCount();
+    const sessions = res.data.content || [];
+    const dateCounts = {};
 
-    renderDashboardUI(memorizedCount, totalWords);
+    sessions.forEach(session => {
+      if (!session.startedAt) return;
+      const date = session.startedAt.split('T')[0];
+      dateCounts[date] = (dateCounts[date] || 0) + 1;
+    });
+
+    renderGrassCalendar(dateCounts);
 
   } catch (error) {
-    console.error('대시보드 로드 실패:', error);
-    showToast('네트워크 오류가 발생했습니다.', 'error');
+    renderGrassCalendar({});
   }
 }
 
-// 7. 스크립트가 로드되자마자 실행!
-renderUserName();
-initDashboard();
+function renderGrassCalendar(dateCounts) {
+  const container = document.getElementById('grassCalendarContainer');
+  if (!container) return;
+
+  const today = new Date();
+  const WEEKS_TO_RENDER = 52; 
+  const TOTAL_DAYS = WEEKS_TO_RENDER * 7;
+
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - today.getDay() - (WEEKS_TO_RENDER - 1) * 7);
+
+  const dayLabelsHTML = `
+    <div class="grass-day-labels">
+      <span></span><span>월</span><span></span><span>수</span><span></span><span>금</span><span></span>
+    </div>
+  `;
+
+  let gridHTML = '<div class="grass-grid">';
+  let monthLabelsHTML = '<div class="grass-month-labels">';
+  let currentMonth = -1;
+
+  for (let i = 0; i < TOTAL_DAYS; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + i);
+
+    const year = currentDate.getFullYear();
+    const monthIndex = currentDate.getMonth() + 1;
+    const month = String(monthIndex).padStart(2, '0');
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+
+    // 월 라벨 처리
+    if (currentDate.getDate() <= 7 && monthIndex !== currentMonth) {
+      const weekIndex = Math.floor(i / 7);
+      // 🔥 셀(14px) + 여백(4px) = 18px 단위로 계산
+      monthLabelsHTML += `<span class="grass-month-label" style="left: ${weekIndex * 18}px">${monthIndex}월</span>`;
+      currentMonth = monthIndex;
+    }
+
+    const count = dateCounts[dateString] || 0;
+    let level = 0;
+    if (count === 1) level = 1;
+    else if (count >= 2 && count <= 3) level = 2;
+    else if (count >= 4 && count <= 5) level = 3;
+    else if (count > 5) level = 4;
+
+    const isFuture = currentDate > today;
+    const visibilityStyle = isFuture ? 'opacity: 0; pointer-events: none;' : '';
+    
+    // 🔥 기본 title 속성 제거하고 커스텀 데이터 속성 주입
+    gridHTML += `<div class="grass-cell" data-level="${level}" data-date="${dateString}" data-count="${count}" style="${visibilityStyle}"></div>`;
+  }
+
+  gridHTML += '</div>';
+  monthLabelsHTML += '</div>';
+
+  const legendHTML = `
+    <div class="grass-legend">
+      <span>Less</span>
+      <div class="grass-cell" data-level="0"></div>
+      <div class="grass-cell" data-level="1"></div>
+      <div class="grass-cell" data-level="2"></div>
+      <div class="grass-cell" data-level="3"></div>
+      <div class="grass-cell" data-level="4"></div>
+      <span>More</span>
+    </div>
+  `;
+
+  container.innerHTML = `
+    <div class="grass-calendar-container">
+      ${dayLabelsHTML}
+      <div class="grass-graph-wrapper">
+        ${monthLabelsHTML}
+        ${gridHTML}
+      </div>
+    </div>
+    ${legendHTML}
+  `;
+
+  // 🔥 툴팁 이벤트 바인딩 실행
+  bindTooltipEvents();
+}
+
+// 🔥 즉각적으로 반응하는 깃허브 스타일 툴팁 로직
+function bindTooltipEvents() {
+  const wrapper = document.querySelector('.grass-calendar-wrapper');
+  const tooltip = document.getElementById('grassTooltip');
+  if (!wrapper || !tooltip) return;
+
+  wrapper.addEventListener('mouseover', (e) => {
+    if (e.target.classList.contains('grass-cell') && e.target.style.opacity !== '0') {
+      const date = e.target.dataset.date;
+      const count = parseInt(e.target.dataset.count, 10);
+      if (!date) return;
+
+      // 날짜 포맷 변환 (예: 2026-05-02 -> 2026년 5월 2일)
+      const [y, m, d] = date.split('-');
+      const dateStr = `${y}년 ${parseInt(m, 10)}월 ${parseInt(d, 10)}일`;
+      
+      tooltip.textContent = count > 0 ? `${count}번 학습 (${dateStr})` : `학습 기록 없음 (${dateStr})`;
+
+      // 마우스 올린 셀의 위치값을 계산해서 툴팁을 정확히 그 위에 배치
+      const rect = e.target.getBoundingClientRect();
+      tooltip.style.left = `${rect.left + rect.width / 2}px`;
+      tooltip.style.top = `${rect.top}px`;
+      tooltip.style.opacity = '1';
+    }
+  });
+
+  wrapper.addEventListener('mouseout', (e) => {
+    if (e.target.classList.contains('grass-cell')) {
+      tooltip.style.opacity = '0';
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderUserName();
+  loadGrassCalendarData();
+});
