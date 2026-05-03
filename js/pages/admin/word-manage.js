@@ -14,16 +14,43 @@ let currentPage = 0;
 let totalPages  = 0;
 let editingWordId = null; // null이면 추가 모드, 숫자이면 수정 모드
 let wordCache = {};       // { [id]: wordData } — 수정 시 기존 값 참조용
+let selectedPos = null;   // 품사 선택 상태
+
+const POS_OPTIONS = ['Noun', 'Verb', 'Adjective', 'Adverb', 'Preposition', 'Conjunction'];
 
 // ── DOM 참조 ─────────────────────────────────────────────────
 const wordList    = document.getElementById('wordList');
 const pagination  = document.getElementById('pagination');
 const wordModal   = document.getElementById('wordModal');
 const modalTitle  = document.getElementById('modalTitle');
-const fieldEnglish      = document.getElementById('fieldEnglish');
-const fieldMeaning      = document.getElementById('fieldMeaning');
-const fieldPronunciation = document.getElementById('fieldPronunciation');
-const fieldExample      = document.getElementById('fieldExample');
+const fieldEnglish = document.getElementById('fieldEnglish');
+const fieldMeaning = document.getElementById('fieldMeaning');
+const fieldExample = document.getElementById('fieldExample');
+
+// ── 품사 버튼 초기화 ──────────────────────────────────────────
+function initPosButtons() {
+  const container = document.getElementById('posButtons');
+  container.innerHTML = POS_OPTIONS.map(pos =>
+    `<button type="button" class="pos-btn" data-pos="${pos}">${pos}</button>`
+  ).join('');
+
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('.pos-btn');
+    if (!btn) return;
+    e.preventDefault();
+    container.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('pos-btn--active'));
+    btn.classList.add('pos-btn--active');
+    selectedPos = btn.dataset.pos;
+  });
+}
+
+function setPosBtnActive(pos) {
+  const container = document.getElementById('posButtons');
+  container.querySelectorAll('.pos-btn').forEach(b => {
+    b.classList.toggle('pos-btn--active', b.dataset.pos === pos);
+  });
+  selectedPos = pos || null;
+}
 
 // ── 단어 목록 로드 ────────────────────────────────────────────
 async function loadWords(page) {
@@ -89,15 +116,15 @@ function openModal(mode, word = null) {
   modalTitle.textContent = mode === 'edit' ? '단어 수정' : '단어 추가';
 
   if (mode === 'edit' && word) {
-    fieldEnglish.value       = word.english        || '';
-    fieldMeaning.value       = word.korean         || '';
-    fieldPronunciation.value = word.pronunciation  || '';
-    fieldExample.value       = word.exampleSentence || '';
+    fieldEnglish.value = word.english         || '';
+    fieldMeaning.value = word.korean          || '';
+    fieldExample.value = word.exampleSentence || '';
+    setPosBtnActive(word.partOfSpeech || null);
   } else {
-    fieldEnglish.value       = '';
-    fieldMeaning.value       = '';
-    fieldPronunciation.value = '';
-    fieldExample.value       = '';
+    fieldEnglish.value = '';
+    fieldMeaning.value = '';
+    fieldExample.value = '';
+    setPosBtnActive(null);
   }
 
   wordModal.classList.add('is-open');
@@ -111,9 +138,8 @@ function closeModal() {
 
 // ── 저장 (추가 / 수정) ────────────────────────────────────────
 async function handleSave() {
-  const english       = fieldEnglish.value.trim();
-  const meaning       = fieldMeaning.value.trim();
-  const pronunciation = fieldPronunciation.value.trim();
+  const english         = fieldEnglish.value.trim();
+  const meaning         = fieldMeaning.value.trim();
   const exampleSentence = fieldExample.value.trim();
 
   if (!english) { showToast('영단어를 입력하세요.', 'error'); fieldEnglish.focus(); return; }
@@ -129,17 +155,17 @@ async function handleSave() {
       // 수정: 변경된 필드만 전송 (PATCH)
       const prev = wordCache[editingWordId] || {};
       const payload = {};
-      if (english         !== (prev.english        || '')) payload.english         = english;
-      if (meaning         !== (prev.korean         || '')) payload.korean          = meaning;
-      if (pronunciation   !== (prev.pronunciation  || '')) payload.pronunciation   = pronunciation;
-      if (exampleSentence !== (prev.exampleSentence|| '')) payload.exampleSentence = exampleSentence;
+      if (english         !== (prev.english         || '')) payload.english         = english;
+      if (meaning         !== (prev.korean          || '')) payload.korean          = meaning;
+      if (exampleSentence !== (prev.exampleSentence || '')) payload.exampleSentence = exampleSentence;
+      if (selectedPos     !== (prev.partOfSpeech    || null)) payload.partOfSpeech  = selectedPos;
 
       if (!Object.keys(payload).length) { showToast('변경된 내용이 없습니다.', 'info'); return; }
       res = await WordApi.update(editingWordId, payload);
     } else {
       // 추가
       const payload = { english, korean: meaning };
-      if (pronunciation)   payload.pronunciation   = pronunciation;
+      if (selectedPos)     payload.partOfSpeech  = selectedPos;
       if (exampleSentence) payload.exampleSentence = exampleSentence;
       res = await WordApi.create(payload);
     }
@@ -219,4 +245,5 @@ wordModal.addEventListener('keydown', (e) => {
 });
 
 // ── 초기 로드 ────────────────────────────────────────────────
+initPosButtons();
 loadWords(0);
