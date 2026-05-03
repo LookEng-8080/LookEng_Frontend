@@ -46,6 +46,11 @@ async function request(method, path, body = null) {
     return null;
   }
 
+  // 3. 204 No Content (DELETE 성공 등 바디 없는 응답)
+  if (res.status === 204 || res.headers.get('content-length') === '0') {
+    return { success: true, message: '', data: null };
+  }
+
   return res.json();
 }
 
@@ -101,7 +106,7 @@ export const WordApi = {
   /**
    * 단어 상세 조회
    * GET /api/v1/words/:id
-   * @returns {{ success, message, data: { id, english, meaning, pronunciation, exampleSentence, isMemorized, isBookmarked, createdAt, updatedAt } }}
+   * @returns {{ success, message, data: { id, english, korean, pronunciation, exampleSentence, isMemorized, isBookmarked, createdAt, updatedAt } }}
    */
   getDetail(id) {
     return request('GET', `/api/v1/words/${id}`);
@@ -110,7 +115,7 @@ export const WordApi = {
   /**
    * 단어 추가 (ADMIN 전용)
    * POST /api/v1/words
-   * @param {{ english, meaning, pronunciation, exampleSentence }} data
+   * @param {{ english, korean, pronunciation, exampleSentence }} data
    */
   create(data) {
     return request('POST', '/api/v1/words', data);
