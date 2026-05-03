@@ -3,7 +3,7 @@ import { auth } from '../auth.js';
 import { showToast, buildSidebar, renderPagination, formatDate, formatDuration } from '../utils.js';
 
 auth.requireLogin();
-buildSidebar('test');
+buildSidebar('test-history');
 
 const PAGE_SIZE = 10;
 
