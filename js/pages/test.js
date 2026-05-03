@@ -8,7 +8,7 @@ buildSidebar('test');
 // ── 최근 기록 로드 ────────────────────────────────────────────
 async function loadRecentHistory() {
   try {
-    const res = await TestApi.getHistory(0, 5);
+    const res = await TestApi.getHistory(0, 3);
     if (!res || !res.success || !res.data.content.length) return;
 
     const records = res.data.content;
@@ -20,7 +20,7 @@ async function loadRecentHistory() {
       const accuracyClass = r.accuracy >= 80 ? 'high' : r.accuracy >= 50 ? 'mid' : 'low';
       return `
         <div class="session-row">
-          <span class="session-row__date">${formatDate(r.finishedAt)}</span>
+          <span class="session-row__date">${formatDate(r.startedAt)}</span>
           <span class="session-row__type">${QUIZ_TYPE_LABEL[r.quizType] ?? r.quizType}</span>
           <span class="session-row__count">${r.totalCount}문제</span>
           <span class="session-row__accuracy session-row__accuracy--${accuracyClass}">${r.accuracy}%</span>
