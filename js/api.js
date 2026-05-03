@@ -46,6 +46,11 @@ async function request(method, path, body = null) {
     return null;
   }
 
+  // 3. 204 No Content (DELETE 성공 등 바디 없는 응답)
+  if (res.status === 204 || res.headers.get('content-length') === '0') {
+    return { success: true, message: '', data: null };
+  }
+
   return res.json();
 }
 
