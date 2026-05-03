@@ -515,36 +515,7 @@
   margin-bottom: 10px;
 }
 
-.recent-history__list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* session-row 그리드: 날짜 | 유형 | 문제수 | 정답률 (duration 제외) */
+.recent-history .session-row {
+  grid-template-columns: 90px 60px 60px 1fr;
 }
-
-.recent-history__item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.8125rem;
-  padding: 6px 0;
-}
-
-.recent-history__date {
-  color: var(--color-text-muted);
-  flex: 0 0 80px;
-}
-
-.recent-history__count {
-  color: var(--color-text-secondary);
-  flex: 0 0 44px;
-}
-
-.recent-history__accuracy {
-  font-weight: 700;
-  margin-left: auto;
-}
-
-.recent-history__accuracy.high { color: #27ae60; }
-.recent-history__accuracy.mid  { color: #e67e22; }
-.recent-history__accuracy.low  { color: #e74c3c; }

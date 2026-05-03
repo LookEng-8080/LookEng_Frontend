@@ -15,13 +15,18 @@ async function loadRecentHistory() {
     const listEl  = document.getElementById('recentHistoryList');
     const wrapEl  = document.getElementById('recentHistory');
 
-    listEl.innerHTML = records.map(r => `
-      <li class="recent-history__item">
-        <span class="recent-history__date">${formatDate(r.finishedAt)}</span>
-        <span class="recent-history__count">${r.totalCount}문제</span>
-        <span class="recent-history__accuracy ${r.accuracy >= 80 ? 'high' : r.accuracy >= 50 ? 'mid' : 'low'}">${r.accuracy}%</span>
-      </li>
-    `).join('');
+    const QUIZ_TYPE_LABEL = { SHORT_ANSWER: '주관식', MULTIPLE_CHOICE: '객관식' };
+    listEl.innerHTML = records.map(r => {
+      const accuracyClass = r.accuracy >= 80 ? 'high' : r.accuracy >= 50 ? 'mid' : 'low';
+      return `
+        <div class="session-row">
+          <span class="session-row__date">${formatDate(r.finishedAt)}</span>
+          <span class="session-row__type">${QUIZ_TYPE_LABEL[r.quizType] ?? r.quizType}</span>
+          <span class="session-row__count">${r.totalCount}문제</span>
+          <span class="session-row__accuracy session-row__accuracy--${accuracyClass}">${r.accuracy}%</span>
+        </div>
+      `;
+    }).join('');
 
     wrapEl.hidden = false;
   } catch {
