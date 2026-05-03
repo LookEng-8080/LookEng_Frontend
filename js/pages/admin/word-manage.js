@@ -1,230 +1,222 @@
-import React, { useState } from 'react';
-// import { fetchWords, createWord, updateWord, deleteWord } from '../api'; // 실제 API 연동 시 주석 해제
+import { WordApi } from '../../api.js';
+import { auth } from '../../auth.js';
+import { showToast, buildSidebar, renderPagination, getPosClass } from '../../utils.js';
 
-const WordManagePage = () => {
-    // 임시 데이터 (백엔드 연동 전 화면 확인용)
-    const [words, setWords] = useState([
-        { id: 1, english: 'implement', korean: '실행하다', partOfSpeech: '동사', exampleSentence: 'The company decided to implement a new marketing strategy.' },
-        { id: 2, english: 'prominent', korean: '저명한', partOfSpeech: '형용사', exampleSentence: 'She is a prominent researcher in the field of AI.' },
-        { id: 3, english: 'unanimous', korean: '만장일치의', partOfSpeech: '형용사', exampleSentence: 'The board reached a unanimous decision.' }
-    ]);
+// 1. 진입 보호: 비로그인 → login.html, USER → 403.html
+auth.requireAdmin();
 
-    // 모달 상태 관리
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingWord, setEditingWord] = useState(null); // 수정할 단어 데이터 (null이면 '추가' 모드)
+// 2. 사이드바 렌더링
+buildSidebar('admin-word');
 
-    // 폼 입력 상태 관리
-    const [formData, setFormData] = useState({
-        english: '',
-        korean: '',
-        partOfSpeech: '',
-        exampleSentence: ''
-    });
+// ── 상태 ─────────────────────────────────────────────────────
+const PAGE_SIZE = 20;
+let currentPage = 0;
+let totalPages  = 0;
+let editingWordId = null; // null이면 추가 모드, 숫자이면 수정 모드
+let wordCache = {};       // { [id]: wordData } — 수정 시 기존 값 참조용
 
-    // '+ 새 단어 추가' 버튼 클릭 시 모달 열기
-    const handleOpenAdd = () => {
-        setEditingWord(null);
-        setFormData({ english: '', korean: '', partOfSpeech: '', exampleSentence: '' });
-        setIsModalOpen(true);
-    };
+// ── DOM 참조 ─────────────────────────────────────────────────
+const wordList    = document.getElementById('wordList');
+const pagination  = document.getElementById('pagination');
+const wordModal   = document.getElementById('wordModal');
+const modalTitle  = document.getElementById('modalTitle');
+const fieldEnglish      = document.getElementById('fieldEnglish');
+const fieldMeaning      = document.getElementById('fieldMeaning');
+const fieldPronunciation = document.getElementById('fieldPronunciation');
+const fieldExample      = document.getElementById('fieldExample');
 
-    // '수정' 버튼 클릭 시 모달 열기 및 기존 데이터 채우기
-    const handleOpenEdit = (word) => {
-        setEditingWord(word);
-        setFormData({
-            english: word.english,
-            korean: word.korean,
-            partOfSpeech: word.partOfSpeech || '',
-            exampleSentence: word.exampleSentence || ''
-        });
-        setIsModalOpen(true);
-    };
+// ── 단어 목록 로드 ────────────────────────────────────────────
+async function loadWords(page) {
+  try {
+    const res = await WordApi.getList(page, PAGE_SIZE);
+    if (!res || !res.success) {
+      showToast(res?.message || '단어 목록을 불러오지 못했습니다.', 'error');
+      return;
+    }
+    const { content, totalPages: tp, currentPage: cp } = res.data;
+    currentPage = cp ?? page;
+    totalPages  = tp;
 
-    // 폼 입력값 변경 핸들러
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
+    content.forEach(w => { wordCache[w.id] = w; });
 
-    // 단어 삭제 처리
-    const handleDelete = (id) => {
-        if (window.confirm('정말 삭제하시겠습니까?')) {
-            // deleteWord(id).then(() => { ... }) // 실제 API 호출
-            setWords(words.filter(word => word.id !== id));
-        }
-    };
+    renderWordList(content);
+    renderPagination(pagination, currentPage, totalPages, (p) => loadWords(p));
+  } catch {
+    showToast('네트워크 오류가 발생했습니다.', 'error');
+  }
+}
 
-    // 폼 제출 (추가 또는 수정 처리)
-    const handleSubmit = (e) => {
-        e.preventDefault();
+// ── 단어 카드 렌더링 ─────────────────────────────────────────
+function renderWordList(words) {
+  if (!words.length) {
+    wordList.innerHTML = `
+      <li class="word-list-empty">
+        <div class="word-list-empty__icon">📝</div>
+        <p class="word-list-empty__text">등록된 단어가 없습니다.</p>
+      </li>`;
+    return;
+  }
 
-        if (editingWord) {
-            // [수정] 모드 로직
-            // updateWord(editingWord.id, formData).then(() => { ... }) // 실제 API 호출
-            const updatedWords = words.map(w => w.id === editingWord.id ? { ...w, ...formData } : w);
-            setWords(updatedWords);
-        } else {
-            // [추가] 모드 로직
-            // createWord(formData).then(() => { ... }) // 실제 API 호출
-            const newWord = {
-                id: Date.now(), // 임시 ID 발급
-                ...formData
-            };
-            setWords([...words, newWord]);
-        }
-
-        setIsModalOpen(false); // 처리 후 모달 닫기
-    };
-
-    return (
-        <div className="flex min-h-screen bg-gray-50">
-            {/* 왼쪽 사이드바 (다크 테마 적용) */}
-            <aside className="w-64 bg-[#1a2332] text-white flex flex-col justify-between">
-                <div className="p-6">
-                    <h1 className="text-2xl font-bold mb-8">L👀kEng</h1>
-                    <nav className="space-y-2">
-                        <button className="w-full flex items-center px-4 py-3 bg-[#2d3748] rounded-lg text-left">
-                            <span className="mr-3">📝</span> 단어장 관리
-                        </button>
-                        <button className="w-full flex items-center px-4 py-3 hover:bg-white/10 rounded-lg text-left text-gray-400">
-                            <span className="mr-3">🎯</span> 단어 퀴즈 세션
-                        </button>
-                    </nav>
-                </div>
-                <div className="p-6">
-                    <p className="font-semibold mb-2">admin 님</p>
-                    <button className="text-sm text-red-400 hover:text-red-300">로그아웃</button>
-                </div>
-            </aside>
-
-            {/* 메인 콘텐츠 영역 */}
-            <main className="flex-1 p-8">
-                <div className="flex justify-between items-center mb-8">
-                    <div className="flex items-center space-x-3">
-                        <h2 className="text-2xl font-bold text-gray-800">단어장 관리</h2>
-                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded font-semibold">ADMIN</span>
-                    </div>
-                    {/* 단어 추가 버튼 - handleOpenAdd 연결 */}
-                    <button
-                        onClick={handleOpenAdd}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-md font-medium transition-colors"
-                    >
-                        + 새 단어 추가
-                    </button>
-                </div>
-
-                {/* 단어 리스트 표시 영역 */}
-                <div className="space-y-4">
-                    {words.map((word) => (
-                        <div key={word.id} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex justify-between items-start">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">{word.english}</h3>
-                                {word.exampleSentence && (
-                                    <div className="flex items-start text-gray-500 italic mt-3">
-                                        <div className="w-1 h-5 bg-blue-200 mr-3 mt-1"></div>
-                                        <p className="text-sm">{word.exampleSentence}</p>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex space-x-4 items-center h-full">
-                                {/* 수정 버튼 - handleOpenEdit 연결 */}
-                                <button
-                                    onClick={() => handleOpenEdit(word)}
-                                    className="text-gray-500 hover:text-blue-500 text-sm font-medium transition-colors"
-                                >
-                                    수정
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(word.id)}
-                                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded text-sm transition-colors"
-                                >
-                                    삭제
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </main>
-
-            {/*  모달 (Modal) 컴포넌트  */}
-            {isModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl">
-                        <h2 className="text-2xl font-bold mb-6 text-gray-800">
-                            {editingWord ? '단어 수정하기' : '새 단어 추가'}
-                        </h2>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">영단어 <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text"
-                                    name="english"
-                                    value={formData.english}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="예: apple"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">한국어 뜻 <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text"
-                                    name="korean"
-                                    value={formData.korean}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="예: 사과"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">품사</label>
-                                <input
-                                    type="text"
-                                    name="partOfSpeech"
-                                    value={formData.partOfSpeech}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="예: 명사, 동사"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">예문</label>
-                                <textarea
-                                    name="exampleSentence"
-                                    value={formData.exampleSentence}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24 resize-none"
-                                    placeholder="예문을 입력하세요."
-                                ></textarea>
-                            </div>
-
-                            <div className="mt-8 flex justify-end space-x-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="px-5 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors font-medium"
-                                >
-                                    취소
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm"
-                                >
-                                    {editingWord ? '수정 완료' : '추가하기'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+  wordList.innerHTML = words.map(w => {
+    const posClass = getPosClass(w.partOfSpeech || '');
+    const posBadge = w.partOfSpeech
+      ? `<span class="pos-badge ${posClass}">${w.partOfSpeech}</span>`
+      : '';
+    const example = w.exampleSentence
+      ? `<p class="word-card__example">${w.exampleSentence}</p>`
+      : '';
+    return `
+      <li class="word-card" data-word-id="${w.id}">
+        <div class="word-card__top">
+          <div class="word-card__front-top">
+            <strong class="word-card__english en">${w.english}</strong>
+            ${posBadge}
+          </div>
+          <div class="word-card__actions">
+            <button class="btn btn--ghost btn--sm edit-btn" data-id="${w.id}">수정</button>
+            <button class="btn btn--danger btn--sm delete-btn" data-id="${w.id}">삭제</button>
+          </div>
         </div>
-    );
-};
+        <p class="word-card__korean">${w.korean ?? '-'}</p>
+        ${example}
+      </li>`;
+  }).join('');
+}
 
-export default WordManagePage;
+// ── 모달 열기/닫기 ─────────────────────────────────────────
+function openModal(mode, word = null) {
+  editingWordId = mode === 'edit' ? word.id : null;
+  modalTitle.textContent = mode === 'edit' ? '단어 수정' : '단어 추가';
+
+  if (mode === 'edit' && word) {
+    fieldEnglish.value       = word.english        || '';
+    fieldMeaning.value       = word.korean         || '';
+    fieldPronunciation.value = word.pronunciation  || '';
+    fieldExample.value       = word.exampleSentence || '';
+  } else {
+    fieldEnglish.value       = '';
+    fieldMeaning.value       = '';
+    fieldPronunciation.value = '';
+    fieldExample.value       = '';
+  }
+
+  wordModal.classList.add('is-open');
+  fieldEnglish.focus();
+}
+
+function closeModal() {
+  wordModal.classList.remove('is-open');
+  editingWordId = null;
+}
+
+// ── 저장 (추가 / 수정) ────────────────────────────────────────
+async function handleSave() {
+  const english       = fieldEnglish.value.trim();
+  const meaning       = fieldMeaning.value.trim();
+  const pronunciation = fieldPronunciation.value.trim();
+  const exampleSentence = fieldExample.value.trim();
+
+  if (!english) { showToast('영단어를 입력하세요.', 'error'); fieldEnglish.focus(); return; }
+  if (!meaning) { showToast('뜻을 입력하세요.', 'error'); fieldMeaning.focus(); return; }
+
+  const saveBtn = document.getElementById('saveBtn');
+  saveBtn.classList.add('btn--loading');
+  saveBtn.disabled = true;
+
+  try {
+    let res;
+    if (editingWordId) {
+      // 수정: 변경된 필드만 전송 (PATCH)
+      const prev = wordCache[editingWordId] || {};
+      const payload = {};
+      if (english         !== (prev.english        || '')) payload.english         = english;
+      if (meaning         !== (prev.korean         || '')) payload.korean          = meaning;
+      if (pronunciation   !== (prev.pronunciation  || '')) payload.pronunciation   = pronunciation;
+      if (exampleSentence !== (prev.exampleSentence|| '')) payload.exampleSentence = exampleSentence;
+
+      if (!Object.keys(payload).length) { showToast('변경된 내용이 없습니다.', 'info'); return; }
+      res = await WordApi.update(editingWordId, payload);
+    } else {
+      // 추가
+      const payload = { english, korean: meaning };
+      if (pronunciation)   payload.pronunciation   = pronunciation;
+      if (exampleSentence) payload.exampleSentence = exampleSentence;
+      res = await WordApi.create(payload);
+    }
+
+    if (!res || !res.success) {
+      showToast(res?.message || '저장에 실패했습니다.', 'error');
+      return;
+    }
+
+    showToast(editingWordId ? '단어가 수정되었습니다.' : '단어가 추가되었습니다.', 'success');
+    closeModal();
+    await loadWords(editingWordId ? currentPage : 0);
+  } catch {
+    showToast('네트워크 오류가 발생했습니다.', 'error');
+  } finally {
+    saveBtn.classList.remove('btn--loading');
+    saveBtn.disabled = false;
+  }
+}
+
+// ── 삭제 ─────────────────────────────────────────────────────
+async function handleDelete(id) {
+  const word = wordCache[id];
+  const label = word ? `'${word.english}'` : '이 단어';
+  if (!confirm(`${label}을(를) 삭제하시겠습니까?`)) return;
+
+  try {
+    const res = await WordApi.delete(id);
+    if (!res || !res.success) {
+      showToast(res?.message || '삭제에 실패했습니다.', 'error');
+      return;
+    }
+    delete wordCache[id];
+    showToast('단어가 삭제되었습니다.', 'success');
+    // 현재 페이지가 마지막이고 1개만 남았으면 이전 페이지로
+    const nextPage = (wordList.querySelectorAll('.word-card[data-word-id]').length === 1 && currentPage > 0)
+      ? currentPage - 1 : currentPage;
+    await loadWords(nextPage);
+  } catch {
+    showToast('네트워크 오류가 발생했습니다.', 'error');
+  }
+}
+
+// ── 이벤트 바인딩 ─────────────────────────────────────────────
+document.getElementById('addWordBtn').addEventListener('click', () => openModal('add'));
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+document.getElementById('saveBtn').addEventListener('click', handleSave);
+
+// 모달 오버레이 클릭 시 닫기
+wordModal.addEventListener('click', (e) => {
+  if (e.target === wordModal) closeModal();
+});
+
+// 이벤트 위임: 수정/삭제 버튼
+wordList.addEventListener('click', (e) => {
+  const editBtn   = e.target.closest('.edit-btn');
+  const deleteBtn = e.target.closest('.delete-btn');
+
+  if (editBtn) {
+    const id = Number(editBtn.dataset.id);
+    const word = wordCache[id];
+    if (word) openModal('edit', word);
+  }
+  if (deleteBtn) {
+    handleDelete(Number(deleteBtn.dataset.id));
+  }
+});
+
+// Enter 키로 저장
+wordModal.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    handleSave();
+  }
+  if (e.key === 'Escape') closeModal();
+});
+
+// ── 초기 로드 ────────────────────────────────────────────────
+loadWords(0);

@@ -161,14 +161,17 @@ export function createEyeSvg(size = 1) {
     hl.setAttribute('cy', (17 + parseFloat(oy) * 0.3).toFixed(2));
   }
 
-  // 깜박이기 애니메이션
+  // 깜박이기 애니메이션 (scaleY transform — ry CSS property보다 안정적)
+  sclera.style.transformBox    = 'fill-box';
+  sclera.style.transformOrigin = 'center';
+
   let blinkTimer = null;
   function doBlink() {
-    sclera.style.transition = 'ry 0.07s ease-in';
-    sclera.style.ry = '0.5px';
+    sclera.style.transition = 'transform 0.07s ease-in';
+    sclera.style.transform  = 'scaleY(0.03)';
     setTimeout(() => {
-      sclera.style.transition = 'ry 0.11s ease-out';
-      sclera.style.ry = '16px';
+      sclera.style.transition = 'transform 0.11s ease-out';
+      sclera.style.transform  = 'scaleY(1)';
     }, 90);
   }
 
@@ -180,8 +183,8 @@ export function createEyeSvg(size = 1) {
   function onMouseLeave() {
     clearInterval(blinkTimer);
     blinkTimer = null;
-    sclera.style.transition = 'ry 0.11s ease-out';
-    sclera.style.ry = '16px';
+    sclera.style.transition = 'transform 0.11s ease-out';
+    sclera.style.transform  = 'scaleY(1)';
     iris.setAttribute('cx', '22'); iris.setAttribute('cy', '22');
     pupil.setAttribute('cx', '22'); pupil.setAttribute('cy', '22');
     hl.setAttribute('cx', '18'); hl.setAttribute('cy', '17');
@@ -313,29 +316,29 @@ export function buildSidebar(activeMenu) {
   if (!sidebar) return;
 
   const prefix = location.pathname.includes('/admin/') ? '../' : '';
-  const email = localStorage.getItem('email') || '';
+  const email = auth.getEmail() || '';
   const displayName = email.split('@')[0] || '사용자';
-  const isAdmin = localStorage.getItem('role') === 'ADMIN';
+  const isAdmin = auth.isAdmin();
 
-  let navItems = isAdmin ? [
+  const navItems = isAdmin ? [
     { key: 'admin-word', href: `${prefix}admin/word-manage.html`, label: '단어장 관리', icon: '📝' },
-    { key: 'admin-quiz', href: '#', label: '단어 퀴즈 세션', icon: '🎯' }
+    { key: 'admin-quiz', href: '#', label: '단어 퀴즈 세션', icon: '🎯' },
   ] : [
     { key: 'dashboard', href: `${prefix}dashboard.html`, label: '내 대시보드', icon: '📊' },
-    { key: 'word-list', href: `${prefix}word-list.html`, label: '단어장 관리', icon: '📖' },
-    { key: 'test', href: `${prefix}test.html`, label: '단어 퀴즈 세션', icon: '🎯' }
+    { key: 'word-list', href: `${prefix}word-list.html`, label: '단어장', icon: '📖' },
+    { key: 'test', href: `${prefix}test.html`, label: '단어 퀴즈', icon: '🎯' },
+    { key: 'test-history', href: `${prefix}test-history.html`, label: '테스트 기록', icon: '📋' },
   ];
 
   const navHTML = navItems.map(item => `
     <a href="${item.href}" class="nav-item ${activeMenu === item.key ? 'nav-item--active' : ''}">
-      <span class="nav-item__icon">${item.icon}</span> ${item.label}
+      <span class="nav-item__icon">${item.icon}</span>${item.label}
     </a>
   `).join('');
 
-  // 3번 해결: 로고(a 태그)의 넓이를 글자만큼만 차지하게 inline-block 적용!
   sidebar.innerHTML = `
-    <div class="sidebar__header" style="padding-bottom: 20px;">
-      <a href="${isAdmin ? '#' : prefix + 'dashboard.html'}" class="sidebar__brand" style="display: inline-block; text-decoration: none;">
+    <div class="sidebar__header">
+      <a href="${isAdmin ? '#' : prefix + 'dashboard.html'}" class="sidebar__brand">
         <div class="sidebar__brand-logo">
           <span class="sidebar__brand-l">L</span>
           <span class="sidebar__brand-eye" id="sidebarLogoEye1"></span>
@@ -346,19 +349,27 @@ export function buildSidebar(activeMenu) {
     </div>
     <nav class="sidebar__nav">${navHTML}</nav>
     <div class="sidebar__footer">
+      <span class="sidebar__user-label">로그인 중</span>
       <strong class="sidebar__user-name">${displayName} 님</strong>
-      <button class="sidebar__logout-btn" id="logoutBtn">로그아웃</button>
+      <button class="sidebar__logout-btn" id="logoutBtn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M5 2H2v10h3M9 10l3-3-3-3M12 7H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        로그아웃
+      </button>
     </div>
   `;
 
-  // 눈동자 렌더링 유지
+  // 눈 SVG 렌더링
   const eye1 = document.getElementById('sidebarLogoEye1');
   const eye2 = document.getElementById('sidebarLogoEye2');
-  if (eye1 && typeof createEyeSvg === 'function') eye1.appendChild(createEyeSvg(0.38));
-  if (eye2 && typeof createEyeSvg === 'function') eye2.appendChild(createEyeSvg(0.38));
+  if (eye1) eye1.appendChild(createEyeSvg(0.38));
+  if (eye2) eye2.appendChild(createEyeSvg(0.38));
 
-  document.getElementById('logoutBtn')?.addEventListener('click', () => {
-    localStorage.clear();
+  // 로그아웃: 백엔드 세션 무효화 후 이동
+  document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    try { await AuthApi.logout(); } catch { /* 세션 만료 무시 */ }
+    auth.clearSession();
     location.replace(`${prefix}login.html`);
   });
 }
