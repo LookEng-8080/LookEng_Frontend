@@ -192,81 +192,150 @@ export function createEyeSvg(size = 1) {
   return svg;
 }
 
+// // ── 사이드바 빌더 ─────────────────────────────────────────────
+// /**
+//  * #sidebar 엘리먼트에 사이드바 HTML을 렌더링하고 이벤트를 바인딩
+//  * @param {'dashboard'|'word-list'|'test'|'admin-word'} activeMenu
+//  */
+// export function buildSidebar(activeMenu) {
+//   const sidebar = document.getElementById('sidebar');
+//   if (!sidebar) return;
+
+//   const prefix = getPrefix();
+//   const email = auth.getEmail() || '';
+//   // 이메일에서 @ 앞 부분을 이름으로 사용
+//   const displayName = email.split('@')[0] || '사용자';
+//   const isAdmin = auth.isAdmin();
+
+//   const navItems = [
+//     {
+//       key: 'dashboard',
+//       href: `${prefix}dashboard.html`,
+//       label: '내 대시보드',
+//       icon: `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+//         <rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/>
+//         <rect x="11" y="1" width="6" height="6" rx="1.5" fill="currentColor"/>
+//         <rect x="1" y="11" width="6" height="6" rx="1.5" fill="currentColor"/>
+//         <rect x="11" y="11" width="6" height="6" rx="1.5" fill="currentColor"/>
+//       </svg>`,
+//     },
+//     {
+//       key: 'word-list',
+//       href: `${prefix}word-list.html`,
+//       label: '단어장 관리',
+//       icon: `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+//         <rect x="1" y="3" width="16" height="2" rx="1" fill="currentColor"/>
+//         <rect x="1" y="8" width="16" height="2" rx="1" fill="currentColor"/>
+//         <rect x="1" y="13" width="10" height="2" rx="1" fill="currentColor"/>
+//       </svg>`,
+//     },
+//     {
+//       key: 'test',
+//       href: `${prefix}test.html`,
+//       label: '단어 퀴즈 세션',
+//       icon: `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+//         <circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.5"/>
+//         <circle cx="9" cy="9" r="3" fill="currentColor"/>
+//         <line x1="9" y1="1.5" x2="9" y2="4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+//         <line x1="9" y1="14" x2="9" y2="16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+//         <line x1="1.5" y1="9" x2="4" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+//         <line x1="14" y1="9" x2="16.5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+//       </svg>`,
+//     },
+//   ];
+
+//   // 관리자에게는 단어 관리 링크 추가
+//   if (isAdmin) {
+//     navItems.push({
+//       key: 'admin-word',
+//       href: `${prefix}admin/word-manage.html`,
+//       label: '단어 관리 (관리자)',
+//       icon: `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+//         <path d="M2 14l1.5-4.5L12 1l3 3-8.5 8.5L2 14z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+//         <line x1="9.5" y1="3.5" x2="13.5" y2="7.5" stroke="currentColor" stroke-width="1.5"/>
+//       </svg>`,
+//     });
+//   }
+
+//   const navHTML = navItems.map(item => `
+//     <a href="${item.href}" class="nav-item ${activeMenu === item.key ? 'nav-item--active' : ''}">
+//       <span class="nav-item__icon">${item.icon}</span>
+//       ${item.label}
+//     </a>
+//   `).join('');
+
+//   sidebar.innerHTML = `
+//     <div class="sidebar__header">
+//       <a href="${prefix}dashboard.html" class="sidebar__brand">
+//         <div class="sidebar__brand-logo">
+//           <span class="sidebar__brand-l">L</span>
+//           <span class="sidebar__brand-eye" id="sidebarLogoEye1"></span>
+//           <span class="sidebar__brand-eye" id="sidebarLogoEye2"></span>
+//           <span class="sidebar__brand-keng">kEng</span>
+//         </div>
+//       </a>
+//     </div>
+//     <nav class="sidebar__nav">${navHTML}</nav>
+//     <div class="sidebar__footer">
+//       <span class="sidebar__user-label">로그인 중</span>
+//       <strong class="sidebar__user-name">${displayName} 님 🧑‍💻</strong>
+//       <button class="sidebar__logout-btn" id="logoutBtn">
+//         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+//           <path d="M5 2H2v10h3M9 10l3-3-3-3M12 7H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+//         </svg>
+//         로그아웃
+//       </button>
+//     </div>
+//   `;
+
+//   // 사이드바 로고 눈 렌더링 (작은 크기, 2개)
+//   const eye1 = document.getElementById('sidebarLogoEye1');
+//   const eye2 = document.getElementById('sidebarLogoEye2');
+//   if (eye1) eye1.appendChild(createEyeSvg(0.38));
+//   if (eye2) eye2.appendChild(createEyeSvg(0.38));
+
+//   // 로그아웃 이벤트
+//   document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+//     try { await AuthApi.logout(); } catch (_) { /* 세션 만료 무시 */ }
+//     auth.clearSession();
+//     location.replace(`${prefix}login.html`);
+//   });
+// }
 // ── 사이드바 빌더 ─────────────────────────────────────────────
 /**
  * #sidebar 엘리먼트에 사이드바 HTML을 렌더링하고 이벤트를 바인딩
  * @param {'dashboard'|'word-list'|'test'|'admin-word'} activeMenu
  */
+// ... (위쪽 showToast 등 기존 코드 유지)
+
 export function buildSidebar(activeMenu) {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
 
-  const prefix = getPrefix();
-  const email = auth.getEmail() || '';
-  // 이메일에서 @ 앞 부분을 이름으로 사용
+  const prefix = location.pathname.includes('/admin/') ? '../' : '';
+  const email = localStorage.getItem('email') || '';
   const displayName = email.split('@')[0] || '사용자';
-  const isAdmin = auth.isAdmin();
+  const isAdmin = localStorage.getItem('role') === 'ADMIN';
 
-  const navItems = [
-    {
-      key: 'dashboard',
-      href: `${prefix}dashboard.html`,
-      label: '내 대시보드',
-      icon: `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/>
-        <rect x="11" y="1" width="6" height="6" rx="1.5" fill="currentColor"/>
-        <rect x="1" y="11" width="6" height="6" rx="1.5" fill="currentColor"/>
-        <rect x="11" y="11" width="6" height="6" rx="1.5" fill="currentColor"/>
-      </svg>`,
-    },
-    {
-      key: 'word-list',
-      href: `${prefix}word-list.html`,
-      label: '단어장 관리',
-      icon: `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <rect x="1" y="3" width="16" height="2" rx="1" fill="currentColor"/>
-        <rect x="1" y="8" width="16" height="2" rx="1" fill="currentColor"/>
-        <rect x="1" y="13" width="10" height="2" rx="1" fill="currentColor"/>
-      </svg>`,
-    },
-    {
-      key: 'test',
-      href: `${prefix}test.html`,
-      label: '단어 퀴즈 세션',
-      icon: `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.5"/>
-        <circle cx="9" cy="9" r="3" fill="currentColor"/>
-        <line x1="9" y1="1.5" x2="9" y2="4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="9" y1="14" x2="9" y2="16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="1.5" y1="9" x2="4" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="14" y1="9" x2="16.5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>`,
-    },
+  let navItems = isAdmin ? [
+    { key: 'admin-word', href: `${prefix}admin/word-manage.html`, label: '단어장 관리', icon: '📝' },
+    { key: 'admin-quiz', href: '#', label: '단어 퀴즈 세션', icon: '🎯' }
+  ] : [
+    { key: 'dashboard', href: `${prefix}dashboard.html`, label: '내 대시보드', icon: '📊' },
+    { key: 'word-list', href: `${prefix}word-list.html`, label: '단어장 관리', icon: '📖' },
+    { key: 'test', href: `${prefix}test.html`, label: '단어 퀴즈 세션', icon: '🎯' }
   ];
-
-  // 관리자에게는 단어 관리 링크 추가
-  if (isAdmin) {
-    navItems.push({
-      key: 'admin-word',
-      href: `${prefix}admin/word-manage.html`,
-      label: '단어 관리 (관리자)',
-      icon: `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M2 14l1.5-4.5L12 1l3 3-8.5 8.5L2 14z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-        <line x1="9.5" y1="3.5" x2="13.5" y2="7.5" stroke="currentColor" stroke-width="1.5"/>
-      </svg>`,
-    });
-  }
 
   const navHTML = navItems.map(item => `
     <a href="${item.href}" class="nav-item ${activeMenu === item.key ? 'nav-item--active' : ''}">
-      <span class="nav-item__icon">${item.icon}</span>
-      ${item.label}
+      <span class="nav-item__icon">${item.icon}</span> ${item.label}
     </a>
   `).join('');
 
+  // 3번 해결: 로고(a 태그)의 넓이를 글자만큼만 차지하게 inline-block 적용!
   sidebar.innerHTML = `
-    <div class="sidebar__header">
-      <a href="${prefix}dashboard.html" class="sidebar__brand">
+    <div class="sidebar__header" style="padding-bottom: 20px;">
+      <a href="${isAdmin ? '#' : prefix + 'dashboard.html'}" class="sidebar__brand" style="display: inline-block; text-decoration: none;">
         <div class="sidebar__brand-logo">
           <span class="sidebar__brand-l">L</span>
           <span class="sidebar__brand-eye" id="sidebarLogoEye1"></span>
@@ -277,27 +346,19 @@ export function buildSidebar(activeMenu) {
     </div>
     <nav class="sidebar__nav">${navHTML}</nav>
     <div class="sidebar__footer">
-      <span class="sidebar__user-label">로그인 중</span>
-      <strong class="sidebar__user-name">${displayName} 님 🧑‍💻</strong>
-      <button class="sidebar__logout-btn" id="logoutBtn">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M5 2H2v10h3M9 10l3-3-3-3M12 7H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        로그아웃
-      </button>
+      <strong class="sidebar__user-name">${displayName} 님</strong>
+      <button class="sidebar__logout-btn" id="logoutBtn">로그아웃</button>
     </div>
   `;
 
-  // 사이드바 로고 눈 렌더링 (작은 크기, 2개)
+  // 눈동자 렌더링 유지
   const eye1 = document.getElementById('sidebarLogoEye1');
   const eye2 = document.getElementById('sidebarLogoEye2');
-  if (eye1) eye1.appendChild(createEyeSvg(0.38));
-  if (eye2) eye2.appendChild(createEyeSvg(0.38));
+  if (eye1 && typeof createEyeSvg === 'function') eye1.appendChild(createEyeSvg(0.38));
+  if (eye2 && typeof createEyeSvg === 'function') eye2.appendChild(createEyeSvg(0.38));
 
-  // 로그아웃 이벤트
-  document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-    try { await AuthApi.logout(); } catch (_) { /* 세션 만료 무시 */ }
-    auth.clearSession();
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    localStorage.clear();
     location.replace(`${prefix}login.html`);
   });
 }

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>단어장 관리 - LookEng</title>
+    <!-- Tailwind CSS 연동 (디자인용) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex min-h-screen bg-gray-50">
+
+    <!-- 왼쪽 사이드바 (다크 테마) -->
+    <aside class="w-64 bg-[#1a2332] text-white flex flex-col justify-between">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold mb-8">L👀kEng</h1>
+            <nav class="space-y-2">
+                <button class="w-full flex items-center px-4 py-3 bg-[#2d3748] rounded-lg text-left">
+                    <span class="mr-3">📝</span> 단어장 관리
+                </button>
+                <button class="w-full flex items-center px-4 py-3 hover:bg-white/10 rounded-lg text-left text-gray-400">
+                    <span class="mr-3">🎯</span> 단어 퀴즈 세션
+                </button>
+            </nav>
+        </div>
+        <div class="p-6">
+            <p class="font-semibold mb-2">admin 님</p>
+            <button class="text-sm text-red-400 hover:text-red-300">로그아웃</button>
+        </div>
+    </aside>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="flex-1 p-8">
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex items-center space-x-3">
+                <h2 class="text-2xl font-bold text-gray-800">단어장 관리</h2>
+                <span class="bg-red-500 text-white text-xs px-2 py-1 rounded font-semibold">ADMIN</span>
+            </div>
+            <!-- 단어 추가 버튼 -->
+            <button onclick="openAddModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-md font-medium transition-colors">
+                + 새 단어 추가
+            </button>
+        </div>
+
+        <!-- 단어 리스트가 들어갈 빈 공간 (JS가 채워줌) -->
+        <div id="wordListContainer" class="space-y-4"></div>
+    </main>
+
+    <!-- 🔥 모달 (Modal) 창 (처음엔 숨겨둠: hidden) 🔥 -->
+    <div id="wordModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div class="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl">
+            <h2 id="modalTitle" class="text-2xl font-bold mb-6 text-gray-800">새 단어 추가</h2>
+
+            <form id="wordForm" class="space-y-4">
+                <input type="hidden" id="wordId"> <!-- 수정 시 필요한 단어 ID 숨김 필드 -->
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">영단어 <span class="text-red-500">*</span></label>
+                    <input type="text" id="english" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="예: apple" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">한국어 뜻 <span class="text-red-500">*</span></label>
+                    <input type="text" id="korean" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="예: 사과" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">품사</label>
+                    <input type="text" id="partOfSpeech" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="예: 명사, 동사">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">예문</label>
+                    <textarea id="exampleSentence" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none" placeholder="예문을 입력하세요."></textarea>
+                </div>
+
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors font-medium">취소</button>
+                    <button type="submit" id="submitBtnText" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm">추가하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ⚙️ 자바스크립트 로직 -->
+    <script>
+        // 1. 임시 데이터 세팅
+        let words = [
+            { id: 1, english: 'implement', korean: '실행하다', partOfSpeech: '동사', exampleSentence: 'The company decided to implement a new marketing strategy.' },
+            { id: 2, english: 'prominent', korean: '저명한', partOfSpeech: '형용사', exampleSentence: 'She is a prominent researcher in the field of AI.' },
+            { id: 3, english: 'unanimous', korean: '만장일치의', partOfSpeech: '형용사', exampleSentence: 'The board reached a unanimous decision.' }
+        ];
+
+        // 2. 화면에 단어 리스트 그리기 함수
+        function renderWords() {
+            const container = document.getElementById('wordListContainer');
+            container.innerHTML = ''; // 기존 내용 초기화
+
+            words.forEach(word => {
+                const wordElement = document.createElement('div');
+                wordElement.className = "bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex justify-between items-start";
+                wordElement.innerHTML = `
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">${word.english}</h3>
+                        ${word.exampleSentence ? `
+                            <div class="flex items-start text-gray-500 italic mt-3">
+                                <div class="w-1 h-5 bg-blue-200 mr-3 mt-1"></div>
+                                <p class="text-sm">${word.exampleSentence}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="flex space-x-4 items-center h-full">
+                        <button onclick="openEditModal(${word.id})" class="text-gray-500 hover:text-blue-500 text-sm font-medium transition-colors">수정</button>
+                        <button onclick="deleteWord(${word.id})" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded text-sm transition-colors">삭제</button>
+                    </div>
+                `;
+                container.appendChild(wordElement);
+            });
+        }
+
+        // 3. 모달창 열기/닫기 로직
+        const modal = document.getElementById('wordModal');
+        const form = document.getElementById('wordForm');
+
+        function openAddModal() {
+            form.reset(); // 폼 비우기
+            document.getElementById('wordId').value = '';
+            document.getElementById('modalTitle').innerText = '새 단어 추가';
+            document.getElementById('submitBtnText').innerText = '추가하기';
+            modal.classList.remove('hidden');
+        }
+
+        function openEditModal(id) {
+            const word = words.find(w => w.id === id);
+            if(word) {
+                document.getElementById('wordId').value = word.id;
+                document.getElementById('english').value = word.english;
+                document.getElementById('korean').value = word.korean;
+                document.getElementById('partOfSpeech').value = word.partOfSpeech || '';
+                document.getElementById('exampleSentence').value = word.exampleSentence || '';
+                
+                document.getElementById('modalTitle').innerText = '단어 수정하기';
+                document.getElementById('submitBtnText').innerText = '수정 완료';
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        // 4. 단어 삭제 로직
+        function deleteWord(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                words = words.filter(w => w.id !== id);
+                renderWords(); // 화면 다시 그리기
+            }
+        }
+
+        // 5. 폼 제출 (추가 및 수정) 로직
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // 새로고침 방지
+
+            const id = document.getElementById('wordId').value;
+            const newWord = {
+                english: document.getElementById('english').value,
+                korean: document.getElementById('korean').value,
+                partOfSpeech: document.getElementById('partOfSpeech').value,
+                exampleSentence: document.getElementById('exampleSentence').value
+            };
+
+            if (id) {
+                // 수정 모드
+                const index = words.findIndex(w => w.id == id);
+                words[index] = { ...words[index], ...newWord };
+            } else {
+                // 추가 모드
+                newWord.id = Date.now(); // 임시 ID 부여
+                words.push(newWord);
+            }
+
+            renderWords(); // 화면 다시 그리기
+            closeModal(); // 모달 닫기
+        });
+
+        // 6. 페이지 로드 시 최초 렌더링
+        renderWords();
+    </script>
+</body>
+</html>

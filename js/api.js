@@ -101,7 +101,7 @@ export const WordApi = {
   /**
    * 단어 상세 조회
    * GET /api/v1/words/:id
-   * @returns {{ success, message, data: { id, english, meaning, pronunciation, exampleSentence, isMemorized, isBookmarked, createdAt, updatedAt } }}
+   * @returns {{ success, message, data: { id, english, korean, pronunciation, exampleSentence, isMemorized, isBookmarked, createdAt, updatedAt } }}
    */
   getDetail(id) {
     return request('GET', `/api/v1/words/${id}`);
@@ -110,7 +110,7 @@ export const WordApi = {
   /**
    * 단어 추가 (ADMIN 전용)
    * POST /api/v1/words
-   * @param {{ english, meaning, pronunciation, exampleSentence }} data
+   * @param {{ english, korean, pronunciation, exampleSentence }} data
    */
   create(data) {
     return request('POST', '/api/v1/words', data);
