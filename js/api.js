@@ -178,3 +178,24 @@ export const TestApi = {
     return request('GET', `/api/v1/test/sessions?page=${page}&size=${size}`);
   },
 };
+
+// ── Admin API ─────────────────────────────────────────────────
+export const AdminApi = {
+  /**
+   * 전체 유저 목록 조회 (ADMIN 전용)
+   * GET /api/v1/admin/users
+   * @returns {{ success, message, data: { content[], totalElements } }}
+   */
+  getUsers() {
+    return request('GET', '/api/v1/admin/users');
+  },
+
+  /**
+   * 특정 유저의 테스트 기록 조회 (ADMIN 전용)
+   * GET /api/v1/admin/users/:userId/test-sessions?page=0&size=10
+   * @returns {{ success, message, data: { content[], totalElements, totalPages, currentPage, pageSize } }}
+   */
+  getUserSessions(userId, page = 0, size = 10) {
+    return request('GET', `/api/v1/admin/users/${userId}/test-sessions?page=${page}&size=${size}`);
+  },
+};

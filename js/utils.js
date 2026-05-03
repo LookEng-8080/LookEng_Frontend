@@ -322,7 +322,7 @@ export function buildSidebar(activeMenu) {
 
   const navItems = isAdmin ? [
     { key: 'admin-word', href: `${prefix}admin/word-manage.html`, label: '단어장 관리', icon: '📝' },
-    { key: 'admin-quiz', href: '#', label: '단어 퀴즈 세션', icon: '🎯' },
+    { key: 'admin-quiz', href: `${prefix}admin/quiz-session.html`, label: '단어 퀴즈 세션', icon: '🎯' },
   ] : [
     { key: 'dashboard', href: `${prefix}dashboard.html`, label: '내 대시보드', icon: '📊' },
     { key: 'word-list', href: `${prefix}word-list.html`, label: '단어장', icon: '📖' },

@@ -1,9 +1,40 @@
 import { TestApi } from '../api.js';
 import { auth } from '../auth.js';
-import { showToast, formatDuration, buildSidebar } from '../utils.js';
+import { showToast, formatDuration, formatDate, buildSidebar } from '../utils.js';
 
 auth.requireLogin();
 buildSidebar('test');
+
+// ── 최근 기록 로드 ────────────────────────────────────────────
+async function loadRecentHistory() {
+  try {
+    const res = await TestApi.getHistory(0, 3);
+    if (!res || !res.success || !res.data.content.length) return;
+
+    const records = res.data.content;
+    const listEl  = document.getElementById('recentHistoryList');
+    const wrapEl  = document.getElementById('recentHistory');
+
+    const QUIZ_TYPE_LABEL = { SHORT_ANSWER: '주관식', MULTIPLE_CHOICE: '객관식' };
+    listEl.innerHTML = records.map(r => {
+      const accuracyClass = r.accuracy >= 80 ? 'high' : r.accuracy >= 50 ? 'mid' : 'low';
+      return `
+        <div class="session-row">
+          <span class="session-row__date">${formatDate(r.startedAt)}</span>
+          <span class="session-row__type">${QUIZ_TYPE_LABEL[r.quizType] ?? r.quizType}</span>
+          <span class="session-row__count">${r.totalCount}문제</span>
+          <span class="session-row__accuracy session-row__accuracy--${accuracyClass}">${r.accuracy}%</span>
+        </div>
+      `;
+    }).join('');
+
+    wrapEl.hidden = false;
+  } catch {
+    // 기록 로드 실패는 조용히 무시 (setup UI 방해 안 함)
+  }
+}
+
+loadRecentHistory();
 
 // ── 상태 ─────────────────────────────────────────────────────
 let sessionId       = null;

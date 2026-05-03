@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>퀴즈 세션 관리 - LookEng</title>
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <link rel="stylesheet" href="../../css/pages/admin.css" />
+</head>
+<body>
+  <div class="layout">
+    <div class="layout__sidebar" id="sidebar"></div>
+
+    <main class="layout__main">
+      <div class="admin-page-header">
+        <h2 class="page-title">단어 퀴즈 세션</h2>
+      </div>
+
+      <!-- 유저 그리드 -->
+      <div class="user-grid" id="userGrid"></div>
+    </main>
+  </div>
+
+  <!-- 유저 테스트 기록 모달 -->
+  <div class="modal-overlay" id="sessionsModal">
+    <div class="modal modal--wide">
+      <div class="modal__header">
+        <h2 class="modal__title" id="modalUserName"></h2>
+        <button class="modal__close" id="modalClose">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="session-list" id="sessionList"></div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--primary" id="modalCloseBtn">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../../js/pages/admin/quiz-session.js"></script>
+</body>
+</html>
