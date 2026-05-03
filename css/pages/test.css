@@ -498,3 +498,53 @@
   padding: 60px 20px;
   color: var(--color-text-muted);
 }
+
+/* ── 설정 화면: 최근 기록 ── */
+.recent-history {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.recent-history__title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.recent-history__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recent-history__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8125rem;
+  padding: 6px 0;
+}
+
+.recent-history__date {
+  color: var(--color-text-muted);
+  flex: 0 0 80px;
+}
+
+.recent-history__count {
+  color: var(--color-text-secondary);
+  flex: 0 0 44px;
+}
+
+.recent-history__accuracy {
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.recent-history__accuracy.high { color: #27ae60; }
+.recent-history__accuracy.mid  { color: #e67e22; }
+.recent-history__accuracy.low  { color: #e74c3c; }

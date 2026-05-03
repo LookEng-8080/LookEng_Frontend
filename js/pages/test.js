@@ -1,9 +1,35 @@
 import { TestApi } from '../api.js';
 import { auth } from '../auth.js';
-import { showToast, formatDuration, buildSidebar } from '../utils.js';
+import { showToast, formatDuration, formatDate, buildSidebar } from '../utils.js';
 
 auth.requireLogin();
 buildSidebar('test');
+
+// ── 최근 기록 로드 ────────────────────────────────────────────
+async function loadRecentHistory() {
+  try {
+    const res = await TestApi.getHistory(0, 5);
+    if (!res || !res.success || !res.data.content.length) return;
+
+    const records = res.data.content;
+    const listEl  = document.getElementById('recentHistoryList');
+    const wrapEl  = document.getElementById('recentHistory');
+
+    listEl.innerHTML = records.map(r => `
+      <li class="recent-history__item">
+        <span class="recent-history__date">${formatDate(r.finishedAt)}</span>
+        <span class="recent-history__count">${r.totalCount}문제</span>
+        <span class="recent-history__accuracy ${r.accuracy >= 80 ? 'high' : r.accuracy >= 50 ? 'mid' : 'low'}">${r.accuracy}%</span>
+      </li>
+    `).join('');
+
+    wrapEl.hidden = false;
+  } catch {
+    // 기록 로드 실패는 조용히 무시 (setup UI 방해 안 함)
+  }
+}
+
+loadRecentHistory();
 
 // ── 상태 ─────────────────────────────────────────────────────
 let sessionId       = null;
