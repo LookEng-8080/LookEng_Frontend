@@ -36,12 +36,15 @@ const roleTabs   = document.querySelectorAll('.role-tab');
 const funcTabs   = document.querySelectorAll('.func-tab');
 const loginForm  = document.getElementById('loginForm');
 const signupForm = document.getElementById('signupForm');
+const adminCodeGroup = document.getElementById('adminCodeGroup');
+const signupAdminCode = document.getElementById('signupAdminCode');
 
 // ── 유형 탭 (학생 | 관리자) ───────────────────────────────────
 roleTabs.forEach(tab => {
   tab.addEventListener('click', () => {
     currentRole = tab.dataset.role;
     roleTabs.forEach(t => t.classList.toggle('is-active', t === tab));
+    adminCodeGroup.hidden = currentRole !== 'admin';
     clearErrors();
   });
 });
@@ -110,12 +113,12 @@ loginForm.addEventListener('submit', async (e) => {
 // ── 회원가입 제출 ─────────────────────────────────────────────
 signupForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const email    = document.getElementById('signupEmail').value.trim();
-  const nickname = document.getElementById('signupNickname').value.trim();
-  const password = document.getElementById('signupPassword').value;
-  const confirm  = document.getElementById('signupPasswordConfirm').value;
-  const btn      = document.getElementById('signupBtn');
-  const errorEl  = document.getElementById('signupError');
+  const email     = document.getElementById('signupEmail').value.trim();
+  const nickname  = document.getElementById('signupNickname').value.trim();
+  const password  = document.getElementById('signupPassword').value;
+  const confirm   = document.getElementById('signupPasswordConfirm').value;
+const adminCode = document.getElementById('signupAdminCode') ? document.getElementById('signupAdminCode').value.trim() : '';  const btn       = document.getElementById('signupBtn');
+  const errorEl   = document.getElementById('signupError');
 
   if (!isValidEmail(email)) {
     errorEl.textContent = '올바른 이메일 형식을 입력하세요.';
@@ -123,6 +126,11 @@ signupForm.addEventListener('submit', async (e) => {
   }
   if (!nickname) {
     errorEl.textContent = '닉네임을 입력하세요.';
+    return;
+  }
+  // 💡 관리자 가입인데 관리자 코드를 안 적었을 때 방어 로직 추가
+  if (currentRole === 'admin' && !adminCode) {
+    errorEl.textContent = '관리자 코드를 입력하세요.';
     return;
   }
   if (!password) {
@@ -138,8 +146,14 @@ signupForm.addEventListener('submit', async (e) => {
   btn.textContent = '가입 중...';
 
   try {
-    const apiFn = currentRole === 'admin' ? AuthApi.adminSignup : AuthApi.signup;
-    const res = await apiFn(email, password, nickname);
+    let res;
+    // 💡 역할에 따라 호출하는 API와 넘기는 파라미터를 다르게 분리
+    if (currentRole === 'admin') {
+      res = await AuthApi.adminSignup(email, password, nickname, adminCode);
+    } else {
+      res = await AuthApi.signup(email, password, nickname);
+    }
+
     if (!res || !res.success) {
       errorEl.textContent = res?.message || '회원가입에 실패했습니다.';
       return;
