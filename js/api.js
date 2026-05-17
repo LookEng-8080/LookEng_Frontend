@@ -30,7 +30,7 @@ async function request(method, path, body = null) {
   const res = await fetch(BASE_URL + path, options);
 
   // 1. 인증 만료 → 로그인 페이지
-  if (res.status === 401) {
+  if (res.status === 401 && !path.includes('/auth/')) {
     localStorage.clear();
     const prefix = location.pathname.includes('/admin/') ? '../../' :
                    location.pathname.includes('/pages/') ? '../'    : '';
@@ -39,7 +39,7 @@ async function request(method, path, body = null) {
   }
 
   // 2. 권한 없음 → 403 페이지
-  if (res.status === 403) {
+  if (res.status === 403 && !path.includes('/auth/')) {
     const prefix = location.pathname.includes('/admin/') ? '../../' :
                    location.pathname.includes('/pages/') ? '../'    : '';
     location.replace(`${prefix}pages/403.html`);
@@ -69,8 +69,8 @@ export const AuthApi = {
    * 관리자 회원가입
    * POST /api/v1/auth/admin/signup
    */
-  adminSignup(email, password, nickname) {
-    return request('POST', '/api/v1/auth/admin/signup', { email, password, nickname });
+  adminSignup(email, password, nickname, adminCode) { 
+    return request('POST', '/api/v1/auth/admin/signup', { email, password, nickname, adminCode });
   },
 
   /**
