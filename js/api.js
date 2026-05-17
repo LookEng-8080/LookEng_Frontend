@@ -175,6 +175,45 @@ export const TestApi = {
   },
 };
 
+// ── UserWord API ──────────────────────────────────────────────
+export const UserWordApi = {
+  /**
+   * 북마크 단어 목록 조회
+   * GET /api/v1/user/words/bookmarked
+   * @returns {{ success, message, data: WordResponseDto[] }}
+   */
+  getBookmarked() {
+    return request('GET', '/api/v1/user/words/bookmarked');
+  },
+
+  /**
+   * 암기 완료 단어 목록 조회
+   * GET /api/v1/user/words/memorized
+   * @returns {{ success, message, data: WordResponseDto[] }}
+   */
+  getMemorized() {
+    return request('GET', '/api/v1/user/words/memorized');
+  },
+
+  /**
+   * 북마크 토글
+   * PATCH /api/v1/user/words/:wordId/bookmark
+   * @returns {{ success, message, data: { wordId, isBookmarked } }}
+   */
+  toggleBookmark(wordId) {
+    return request('PATCH', `/api/v1/user/words/${wordId}/bookmark`);
+  },
+
+  /**
+   * 암기 상태 토글
+   * PATCH /api/v1/user/words/:wordId/memorize
+   * @returns {{ success, message, data: { wordId, isMemorized, memorizedAt } }}
+   */
+  toggleMemorize(wordId) {
+    return request('PATCH', `/api/v1/user/words/${wordId}/memorize`);
+  },
+};
+
 // ── Admin API ─────────────────────────────────────────────────
 export const AdminApi = {
   getUsers() {
