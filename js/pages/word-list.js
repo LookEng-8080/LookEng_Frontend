@@ -17,8 +17,8 @@ const PAGE_SIZE = 20;
 let currentPage    = 0;
 let currentSort    = 'english,asc';
 let totalElements  = 0;
-let searchKeyword  = '';      // 현재 검색어 (비어있으면 전체 목록)
-let searchDebounce = null;    // 디바운스 타이머
+let searchKeyword  = '';
+let searchDebounce = null;
 
 // ── DOM 참조 ──────────────────────────────────────────────────
 const searchInput = document.getElementById('searchInput');
@@ -84,7 +84,6 @@ async function searchWords(keyword, page = 0) {
 
     renderWordGrid(content);
 
-    // 검색 결과 페이지네이션
     renderPagination(
       document.getElementById('pagination'),
       page,
@@ -96,7 +95,6 @@ async function searchWords(keyword, page = 0) {
   }
 }
 
-// ── 검색어에 따라 목록 또는 검색 결과 표시 ───────────────────
 function loadByKeyword(keyword, page = 0) {
   if (keyword.trim()) {
     searchWords(keyword.trim(), page);
@@ -124,6 +122,11 @@ function buildWordCard(word) {
   const memorizedClass = memorized ? 'word-card-wrapper--memorized' : '';
   const sentence = word.exampleSentence ? escapeHtml(word.exampleSentence) : '';
 
+  // pronunciationUrl 있으면 data 속성으로 전달
+  const pronunciationAttr = word.pronunciationUrl
+    ? `data-pronunciation-url="${escapeHtml(word.pronunciationUrl)}"`
+    : '';
+
   return `
     <div class="word-card-wrapper ${memorizedClass}" data-word-id="${word.id}">
       <div class="word-card">
@@ -133,6 +136,15 @@ function buildWordCard(word) {
             ${posLabel ? `<span class="pos-badge ${posClass}">${escapeHtml(posLabel)}</span>` : ''}
           </div>
           <p class="word-card__sentence">${sentence}</p>
+          <div class="word-card__bottom">
+            <button
+              class="pronunciation-btn"
+              data-english="${escapeHtml(word.english)}"
+              ${pronunciationAttr}
+              title="발음 듣기"
+              aria-label="${escapeHtml(word.english)} 발음 듣기"
+            >🔊</button>
+          </div>
         </div>
         <div class="word-card__face word-card__back">
           <p class="word-card__meaning">${escapeHtml(word.korean)}</p>
@@ -151,8 +163,67 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-// ── 이벤트 위임 — 카드 클릭 & 암기완료 버튼 ──────────────────
+// ── 발음 재생 ────────────────────────────────────────────────
+function playPronunciation(btn) {
+  const english = btn.dataset.english;
+  const url     = btn.dataset.pronunciationUrl;
+
+  // 재생 중 표시
+  btn.classList.add('pronunciation-btn--playing');
+  const restore = () => btn.classList.remove('pronunciation-btn--playing');
+
+  if (url) {
+    // pronunciationUrl 있으면 오디오 파일 재생
+    const audio = new Audio(url);
+    audio.play().catch(() => {
+      // 오디오 재생 실패 시 TTS로 대체
+      speakTTS(english);
+    });
+    audio.addEventListener('ended', restore);
+    audio.addEventListener('error', () => {
+      restore();
+      speakTTS(english);
+    });
+  } else {
+    // pronunciationUrl 없으면 Web Speech API TTS 재생
+    speakTTS(english, restore);
+  }
+}
+
+function speakTTS(text, onEnd = null) {
+  if (!window.speechSynthesis) {
+    showToast('이 브라우저는 발음 청취를 지원하지 않습니다.', 'error');
+    if (onEnd) onEnd();
+    return;
+  }
+
+  // 이전 발음 중지
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang  = 'en-US';
+  utterance.rate  = 0.9;
+  utterance.pitch = 1;
+
+  if (onEnd) {
+    utterance.addEventListener('end',   onEnd);
+    utterance.addEventListener('error', onEnd);
+  }
+
+  window.speechSynthesis.speak(utterance);
+}
+
+// ── 이벤트 위임 — 카드 클릭 & 암기완료 버튼 & 발음 버튼 ─────
 document.getElementById('wordGrid').addEventListener('click', (e) => {
+  // 1. 발음 버튼
+  const pronunciationBtn = e.target.closest('.pronunciation-btn');
+  if (pronunciationBtn) {
+    e.stopPropagation();
+    playPronunciation(pronunciationBtn);
+    return;
+  }
+
+  // 2. 암기완료 버튼
   const memorizeBtn = e.target.closest('.memorize-btn');
   if (memorizeBtn) {
     e.stopPropagation();
@@ -160,6 +231,7 @@ document.getElementById('wordGrid').addEventListener('click', (e) => {
     return;
   }
 
+  // 3. 카드 클릭 → 플립
   const wrapper = e.target.closest('.word-card-wrapper');
   if (wrapper) {
     const card = wrapper.querySelector('.word-card');
@@ -190,7 +262,6 @@ searchInput.addEventListener('input', () => {
   const keyword = searchInput.value;
   searchClear.hidden = keyword.length === 0;
 
-  // 300ms 디바운스
   clearTimeout(searchDebounce);
   searchDebounce = setTimeout(() => {
     searchKeyword = keyword;
@@ -218,9 +289,9 @@ function clearSearch() {
   loadWords(0, currentSort);
 }
 
-// ── 정렬 셀렉터 (검색 중엔 비활성) ───────────────────────────
+// ── 정렬 셀렉터 ───────────────────────────────────────────────
 sortSelect.addEventListener('change', (e) => {
-  if (searchKeyword.trim()) return; // 검색 중엔 정렬 무시
+  if (searchKeyword.trim()) return;
   loadWords(0, e.target.value);
 });
 
