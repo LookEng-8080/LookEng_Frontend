@@ -49,8 +49,6 @@ async function request(method, path, body = null) {
 }
 
 // ── 공통 fetch 래퍼 (FormData / 파일 업로드) ─────────────────
-// Content-Type 헤더를 지정하지 않아야 브라우저가
-// multipart/form-data + boundary 를 자동으로 설정함
 async function requestFormData(method, path, formData) {
   const options = {
     method,
@@ -60,7 +58,6 @@ async function requestFormData(method, path, formData) {
 
   const res = await fetch(BASE_URL + path, options);
 
-  // 413: 파일 크기 초과
   if (res.status === 413) {
     return { success: false, message: '파일 크기(5MB)를 초과했습니다.' };
   }
@@ -122,6 +119,14 @@ export const WordApi = {
 
   delete(id) {
     return request('DELETE', `/api/v1/words/${id}`);
+  },
+
+  /**
+   * 단어 검색 (영어/한글 부분 일치)
+   * GET /api/v1/words/search?keyword=...&page=0&size=20
+   */
+  search(keyword, page = 0, size = 20) {
+    return request('GET', `/api/v1/words/search?keyword=${encodeURIComponent(keyword)}&page=${page}&size=${size}`);
   },
 
   /**

@@ -10,11 +10,20 @@ if (auth.isAdmin()) {
   document.getElementById('addWordBtn').hidden = false;
 }
 
-// ── 상태 ─────────────────────────────────────────────────────
+// ── 상수 ─────────────────────────────────────────────────────
 const PAGE_SIZE = 20;
-let currentPage = 0;
-let currentSort = 'english,asc';
-let totalElements = 0;
+
+// ── 상태 ─────────────────────────────────────────────────────
+let currentPage    = 0;
+let currentSort    = 'english,asc';
+let totalElements  = 0;
+let searchKeyword  = '';      // 현재 검색어 (비어있으면 전체 목록)
+let searchDebounce = null;    // 디바운스 타이머
+
+// ── DOM 참조 ──────────────────────────────────────────────────
+const searchInput = document.getElementById('searchInput');
+const searchClear = document.getElementById('searchClear');
+const sortSelect  = document.getElementById('sortSelect');
 
 // ── 진도 바 ──────────────────────────────────────────────────
 function getMemorizedCount() {
@@ -28,7 +37,7 @@ function updateProgress() {
   document.getElementById('progressCount').textContent = `암기완료 ${memorized} / ${totalElements}`;
 }
 
-// ── 단어 로드 ─────────────────────────────────────────────────
+// ── 단어 목록 로드 ────────────────────────────────────────────
 async function loadWords(page = 0, sort = currentSort) {
   currentPage = page;
   currentSort = sort;
@@ -57,12 +66,51 @@ async function loadWords(page = 0, sort = currentSort) {
   }
 }
 
+// ── 단어 검색 ────────────────────────────────────────────────
+async function searchWords(keyword, page = 0) {
+  try {
+    const res = await WordApi.search(keyword, page, PAGE_SIZE);
+    if (!res || !res.success) {
+      showToast(res?.message || '검색에 실패했습니다.', 'error');
+      return;
+    }
+
+    const { content, pageInfo } = res.data;
+    const total = pageInfo.totalElements;
+    const totalPages = pageInfo.totalPages;
+
+    document.getElementById('totalCount').textContent =
+      `"${keyword}" 검색 결과 ${total}개`;
+
+    renderWordGrid(content);
+
+    // 검색 결과 페이지네이션
+    renderPagination(
+      document.getElementById('pagination'),
+      page,
+      totalPages,
+      (p) => searchWords(keyword, p)
+    );
+  } catch {
+    showToast('네트워크 오류가 발생했습니다.', 'error');
+  }
+}
+
+// ── 검색어에 따라 목록 또는 검색 결과 표시 ───────────────────
+function loadByKeyword(keyword, page = 0) {
+  if (keyword.trim()) {
+    searchWords(keyword.trim(), page);
+  } else {
+    loadWords(page, currentSort);
+  }
+}
+
 // ── 카드 렌더링 ───────────────────────────────────────────────
 function renderWordGrid(words) {
   const grid = document.getElementById('wordGrid');
 
   if (words.length === 0) {
-    grid.innerHTML = '<div class="empty-state">등록된 단어가 없습니다.</div>';
+    grid.innerHTML = '<div class="empty-state">단어가 없습니다.</div>';
     return;
   }
 
@@ -105,7 +153,6 @@ function escapeHtml(str) {
 
 // ── 이벤트 위임 — 카드 클릭 & 암기완료 버튼 ──────────────────
 document.getElementById('wordGrid').addEventListener('click', (e) => {
-  // 암기완료 버튼 클릭 → 플립 없이 상태만 토글
   const memorizeBtn = e.target.closest('.memorize-btn');
   if (memorizeBtn) {
     e.stopPropagation();
@@ -113,7 +160,6 @@ document.getElementById('wordGrid').addEventListener('click', (e) => {
     return;
   }
 
-  // 카드 클릭 → 플립
   const wrapper = e.target.closest('.word-card-wrapper');
   if (wrapper) {
     const card = wrapper.querySelector('.word-card');
@@ -139,8 +185,42 @@ function toggleMemorized(wordId) {
   updateProgress();
 }
 
-// ── 정렬 셀렉터 ───────────────────────────────────────────────
-document.getElementById('sortSelect').addEventListener('change', (e) => {
+// ── 검색창 이벤트 ─────────────────────────────────────────────
+searchInput.addEventListener('input', () => {
+  const keyword = searchInput.value;
+  searchClear.hidden = keyword.length === 0;
+
+  // 300ms 디바운스
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => {
+    searchKeyword = keyword;
+    loadByKeyword(keyword, 0);
+  }, 300);
+});
+
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    clearTimeout(searchDebounce);
+    searchKeyword = searchInput.value;
+    loadByKeyword(searchKeyword, 0);
+  }
+  if (e.key === 'Escape') {
+    clearSearch();
+  }
+});
+
+searchClear.addEventListener('click', clearSearch);
+
+function clearSearch() {
+  searchInput.value = '';
+  searchClear.hidden = true;
+  searchKeyword = '';
+  loadWords(0, currentSort);
+}
+
+// ── 정렬 셀렉터 (검색 중엔 비활성) ───────────────────────────
+sortSelect.addEventListener('change', (e) => {
+  if (searchKeyword.trim()) return; // 검색 중엔 정렬 무시
   loadWords(0, e.target.value);
 });
 
