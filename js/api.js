@@ -101,6 +101,18 @@ export const AuthApi = {
   withdraw() {
     return request('DELETE', '/api/v1/auth/withdraw');
   },
+
+  requestPasswordReset(email) {
+    return request('POST', '/api/v1/auth/password/reset-request', { email });
+  },
+
+  resetPassword(email, token, newPassword) {
+    return request('POST', '/api/v1/auth/password/reset', { 
+      email, 
+      token: parseInt(token, 10), 
+      newPassword 
+    });
+  },
 };
 
 // ── Word API ──────────────────────────────────────────────────
