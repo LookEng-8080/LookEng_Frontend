@@ -46,8 +46,15 @@
         </div>
       </div>
 
+      <!-- 필터 탭 -->
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab filter-tab--active" data-filter="all">전체</button>
+        <button class="filter-tab" data-filter="bookmarked">★ 북마크</button>
+        <button class="filter-tab" data-filter="memorized">✓ 암기완료</button>
+      </div>
+
       <!-- 컨트롤 바 -->
-      <div class="controls">
+      <div class="controls" id="controls">
         <span id="totalCount" style="font-size:0.875rem;color:var(--color-text-secondary)"></span>
         <select class="sort-select" id="sortSelect">
           <option value="english,asc">A → Z</option>
