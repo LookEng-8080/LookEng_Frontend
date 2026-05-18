@@ -1,4 +1,4 @@
-import { TestApi } from '../api.js';
+import { TestApi, AuthApi } from '../api.js';
 import { auth } from '../auth.js';
 import { showToast, buildSidebar } from '../utils.js';
 

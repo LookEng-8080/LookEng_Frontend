@@ -357,6 +357,11 @@ export function buildSidebar(activeMenu) {
         </svg>
         로그아웃
       </button>
+      ${!isAdmin ? `
+      <button id="withdrawBtn" style="color: #ff4d4f; background: none; border: none; cursor: pointer; font-size: 12px; text-decoration: underline; margin-top: 10px; width: 100%; text-align: center;">
+        회원 탈퇴
+      </button>
+      ` : ''}
     </div>
   `;
 
@@ -371,6 +376,28 @@ export function buildSidebar(activeMenu) {
     try { await AuthApi.logout(); } catch { /* 세션 만료 무시 */ }
     auth.clearSession();
     location.replace(`${prefix}login.html`);
+  });
+
+  // 회원 탈퇴: 재확인 후 백엔드 API 호출, 세션 무효화 후 로그인 화면으로 이동
+  document.getElementById('withdrawBtn')?.addEventListener('click', async () => {
+    const isConfirmed = confirm('정말 LookEng을 탈퇴하시겠습니까?\n탈퇴 시 모든 학습 기록과 단어 데이터가 삭제되며 복구할 수 없습니다.');
+    if (!isConfirmed) return;
+
+    try {
+      const res = await AuthApi.withdraw();
+      if (res && res.success) {
+        alert(res.message || '회원 탈퇴가 완료되었습니다.');
+        
+        auth.clearSession(); // 1. 프론트엔드 세션(로컬 스토리지) 비우기
+        location.replace(`${prefix}login.html`); // 2. 로그인 화면으로 이동
+        
+      } else {
+        alert(res?.message || '회원 탈퇴 중 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('회원 탈퇴 에러:', error);
+      alert('서버 통신 중 문제가 발생했습니다.');
+    }
   });
 }
 
