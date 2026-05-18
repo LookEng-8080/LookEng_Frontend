@@ -413,3 +413,70 @@
   padding: 60px 20px;
   color: var(--color-text-muted);
 }
+
+/* ── 검색창 ── */
+
+.search-bar {
+  margin-bottom: 16px;
+}
+
+.search-bar__inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0 14px;
+  transition: border-color 0.18s;
+}
+
+.search-bar__inner:focus-within {
+  border-color: var(--color-blue-primary);
+}
+
+.search-bar__icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.search-bar__input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 12px 0;
+  font-size: 0.9375rem;
+  font-family: var(--font-ko);
+  color: var(--color-text-primary);
+  background: transparent;
+}
+
+.search-bar__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.search-bar__input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search-bar__clear {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.search-bar__clear:hover {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+}

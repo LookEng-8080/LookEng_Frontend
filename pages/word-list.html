@@ -28,6 +28,24 @@
         <span class="progress-section__count" id="progressCount">암기완료 0 / 0</span>
       </div>
 
+      <!-- 검색창 -->
+      <div class="search-bar">
+        <div class="search-bar__inner">
+          <svg class="search-bar__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <input
+            type="search"
+            class="search-bar__input"
+            id="searchInput"
+            placeholder="영어 또는 한글로 검색"
+            autocomplete="off"
+          />
+          <button class="search-bar__clear" id="searchClear" hidden aria-label="검색 초기화">✕</button>
+        </div>
+      </div>
+
       <!-- 컨트롤 바 -->
       <div class="controls">
         <span id="totalCount" style="font-size:0.875rem;color:var(--color-text-secondary)"></span>
