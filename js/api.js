@@ -10,13 +10,7 @@
 
 const BASE_URL = 'http://localhost:8080';
 
-// ── 공통 fetch 래퍼 ──────────────────────────────────────────
-/**
- * @param {string} method  - HTTP 메서드 (GET, POST, PATCH, DELETE)
- * @param {string} path    - API 경로 (/api/v1/...)
- * @param {object|null} body - 요청 바디 (GET/DELETE는 null)
- * @returns {Promise<{success, message, data}>}
- */
+// ── 공통 fetch 래퍼 (JSON) ────────────────────────────────────
 async function request(method, path, body = null) {
   const options = {
     method,
@@ -54,38 +48,55 @@ async function request(method, path, body = null) {
   return res.json();
 }
 
+// ── 공통 fetch 래퍼 (FormData / 파일 업로드) ─────────────────
+// Content-Type 헤더를 지정하지 않아야 브라우저가
+// multipart/form-data + boundary 를 자동으로 설정함
+async function requestFormData(method, path, formData) {
+  const options = {
+    method,
+    credentials: 'include',
+    body: formData,
+  };
+
+  const res = await fetch(BASE_URL + path, options);
+
+  // 413: 파일 크기 초과
+  if (res.status === 413) {
+    return { success: false, message: '파일 크기(5MB)를 초과했습니다.' };
+  }
+
+  if (res.status === 401 && !path.includes('/auth/')) {
+    localStorage.clear();
+    const prefix = location.pathname.includes('/admin/') ? '../../' :
+                   location.pathname.includes('/pages/') ? '../'    : '';
+    location.replace(`${prefix}pages/login.html`);
+    return null;
+  }
+
+  if (res.status === 403 && !path.includes('/auth/')) {
+    const prefix = location.pathname.includes('/admin/') ? '../../' :
+                   location.pathname.includes('/pages/') ? '../'    : '';
+    location.replace(`${prefix}pages/403.html`);
+    return null;
+  }
+
+  return res.json();
+}
+
 // ── Auth API ──────────────────────────────────────────────────
 export const AuthApi = {
-  /**
-   * 일반 사용자 회원가입
-   * POST /api/v1/auth/signup
-   * @returns {{ success, message, data: { userId, email } }}
-   */
   signup(email, password, nickname) {
     return request('POST', '/api/v1/auth/signup', { email, password, nickname });
   },
 
-  /**
-   * 관리자 회원가입
-   * POST /api/v1/auth/admin/signup
-   */
-  adminSignup(email, password, nickname, adminCode) { 
+  adminSignup(email, password, nickname, adminCode) {
     return request('POST', '/api/v1/auth/admin/signup', { email, password, nickname, adminCode });
   },
 
-  /**
-   * 로그인
-   * POST /api/v1/auth/login
-   * @returns {{ success, message, data: { userId, email, role } }}
-   */
   login(email, password) {
     return request('POST', '/api/v1/auth/login', { email, password });
   },
 
-  /**
-   * 로그아웃
-   * POST /api/v1/auth/logout
-   */
   logout() {
     return request('POST', '/api/v1/auth/logout');
   },
@@ -93,87 +104,51 @@ export const AuthApi = {
 
 // ── Word API ──────────────────────────────────────────────────
 export const WordApi = {
-  /**
-   * 단어 목록 조회 (페이지네이션)
-   * GET /api/v1/words?page=0&size=20&sort=id,asc
-   * sort 옵션: 'id,asc' | 'english,asc' | 'english,desc'
-   * @returns {{ success, message, data: { content[], totalElements, totalPages, currentPage, pageSize } }}
-   */
   getList(page = 0, size = 20, sort = 'id,asc') {
     return request('GET', `/api/v1/words?page=${page}&size=${size}&sort=${encodeURIComponent(sort)}`);
   },
 
-  /**
-   * 단어 상세 조회
-   * GET /api/v1/words/:id
-   * @returns {{ success, message, data: { id, english, korean, pronunciation, exampleSentence, isMemorized, isBookmarked, createdAt, updatedAt } }}
-   */
   getDetail(id) {
     return request('GET', `/api/v1/words/${id}`);
   },
 
-  /**
-   * 단어 추가 (ADMIN 전용)
-   * POST /api/v1/words
-   * @param {{ english, korean, pronunciation, exampleSentence }} data
-   */
   create(data) {
     return request('POST', '/api/v1/words', data);
   },
 
-  /**
-   * 단어 수정 (ADMIN 전용)
-   * PATCH /api/v1/words/:id
-   * @param {object} data - 변경할 필드만 포함 (모든 필드 optional)
-   */
   update(id, data) {
     return request('PATCH', `/api/v1/words/${id}`, data);
   },
 
-  /**
-   * 단어 삭제 (ADMIN 전용)
-   * DELETE /api/v1/words/:id
-   */
   delete(id) {
     return request('DELETE', `/api/v1/words/${id}`);
+  },
+
+  /**
+   * CSV 일괄 단어 추가 (ADMIN 전용)
+   * POST /api/v1/words/bulk — multipart/form-data
+   */
+  bulkUpload(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return requestFormData('POST', '/api/v1/words/bulk', formData);
   },
 };
 
 // ── Test API ──────────────────────────────────────────────────
 export const TestApi = {
-  /**
-   * 테스트 세션 시작
-   * POST /api/v1/test/sessions
-   * quizType: 'SHORT_ANSWER' | 'MULTIPLE_CHOICE'
-   * @returns {{ success, message, data: { sessionId, currentIndex, totalCount, isFinished, quizType, currentQuestion } }}
-   */
   start(totalCount, quizType = 'SHORT_ANSWER') {
     return request('POST', '/api/v1/test/sessions', { totalCount, quizType });
   },
 
-  /**
-   * 답안 제출
-   * POST /api/v1/test/sessions/:sessionId/answers
-   * @returns {{ success, message, data: { sessionId, currentIndex, totalCount, isCorrect, isFinished, currentQuestion } }}
-   */
   submitAnswer(sessionId, wordId, userInput) {
     return request('POST', `/api/v1/test/sessions/${sessionId}/answers`, { wordId, userInput });
   },
 
-  /**
-   * 테스트 종료
-   * POST /api/v1/test/sessions/:sessionId/finish
-   * @returns {{ success, message, data: { sessionId, totalCount, correctCount, accuracy, durationSec, wrongAnswers[], finishedAt } }}
-   */
   finish(sessionId, durationSec) {
     return request('POST', `/api/v1/test/sessions/${sessionId}/finish`, { durationSec });
   },
 
-  /**
-   * 테스트 기록 조회
-   * GET /api/v1/test/sessions?page=0&size=10
-   * @returns {{ success, message, data: { content[], totalElements, totalPages, currentPage, pageSize } }}
-   */
   getHistory(page = 0, size = 10) {
     return request('GET', `/api/v1/test/sessions?page=${page}&size=${size}`);
   },
@@ -181,20 +156,10 @@ export const TestApi = {
 
 // ── Admin API ─────────────────────────────────────────────────
 export const AdminApi = {
-  /**
-   * 전체 유저 목록 조회 (ADMIN 전용)
-   * GET /api/v1/admin/users
-   * @returns {{ success, message, data: { content[], totalElements } }}
-   */
   getUsers() {
     return request('GET', '/api/v1/admin/users');
   },
 
-  /**
-   * 특정 유저의 테스트 기록 조회 (ADMIN 전용)
-   * GET /api/v1/admin/users/:userId/test-sessions?page=0&size=10
-   * @returns {{ success, message, data: { content[], totalElements, totalPages, currentPage, pageSize } }}
-   */
   getUserSessions(userId, page = 0, size = 10) {
     return request('GET', `/api/v1/admin/users/${userId}/test-sessions?page=${page}&size=${size}`);
   },

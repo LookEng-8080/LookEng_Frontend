@@ -358,3 +358,178 @@
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 }
+
+/* ============================================================
+   admin.css 하단에 추가 — CSV 업로드 섹션 스타일
+   ============================================================ */
+
+.csv-upload-section {
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.csv-upload-section__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+}
+
+.csv-upload-section__footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ── 드롭 존 ── */
+.csv-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1.75rem 1rem;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+}
+
+.csv-drop-zone:hover,
+.csv-drop-zone:focus-visible {
+  border-color: var(--color-blue-primary);
+  background: #eff6ff;
+  outline: none;
+}
+
+.csv-drop-zone--active {
+  border-color: var(--color-blue-primary);
+  background: #eff6ff;
+}
+
+.csv-drop-zone__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--color-text-muted);
+}
+
+.csv-drop-zone__text {
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.csv-drop-zone__link {
+  color: var(--color-blue-primary);
+  text-decoration: underline;
+}
+
+.csv-drop-zone__hint {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.csv-drop-zone__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── 파일 정보 바 ── */
+.csv-file-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+  padding: 0.45rem 0.75rem;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.csv-file-info__name {
+  flex: 1;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.csv-file-info__size {
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* ── 포맷 안내 ── */
+.csv-format-guide {
+  margin-top: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.csv-format-guide__toggle {
+  padding: 0.55rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--color-blue-primary);
+  cursor: pointer;
+  list-style: none;
+  background: var(--color-bg);
+  user-select: none;
+}
+
+.csv-format-guide__toggle::-webkit-details-marker { display: none; }
+.csv-format-guide__toggle::before { content: '▶  '; font-size: 0.65rem; }
+details[open] .csv-format-guide__toggle::before { content: '▼  '; }
+
+.csv-format-guide__body {
+  padding: 0.9rem 1rem;
+  font-size: 0.83rem;
+  line-height: 1.65;
+}
+
+.csv-format-guide__code {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  overflow-x: auto;
+  margin: 0.4rem 0;
+  white-space: pre;
+}
+
+.csv-format-guide__notes {
+  margin: 0.4rem 0 0.6rem 1.1rem;
+}
+
+.csv-format-guide__notes li { margin-bottom: 0.2rem; }
+
+/* ── 결과 표시 ── */
+.csv-result {
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.csv-result--success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.csv-result--error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
