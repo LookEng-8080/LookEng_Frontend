@@ -97,6 +97,10 @@ export const AuthApi = {
   logout() {
     return request('POST', '/api/v1/auth/logout');
   },
+  
+  withdraw() {
+    return request('DELETE', '/api/v1/auth/withdraw');
+  },
 };
 
 // ── Word API ──────────────────────────────────────────────────
