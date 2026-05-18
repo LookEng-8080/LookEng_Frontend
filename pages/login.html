@@ -40,20 +40,59 @@
       </div>
 
       <!-- 로그인 폼 -->
-      <form class="login-form" id="loginForm">
-        <div class="form-group">
-          <label class="form-group__label" for="loginEmail">이메일</label>
-          <input type="email" class="input" id="loginEmail" placeholder="example@email.com" autocomplete="email" />
+      <div id="loginSection" style="width: 100%;">
+        <form class="login-form" id="loginForm">
+          <div class="form-group">
+            <label class="form-group__label" for="loginEmail">이메일</label>
+            <input type="email" class="input" id="loginEmail" placeholder="example@email.com" autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label class="form-group__label" for="loginPassword">비밀번호</label>
+            <input type="password" class="input" id="loginPassword" placeholder="비밀번호 입력" autocomplete="current-password" />
+            <p class="form-group__error" id="loginError"></p>
+          </div>
+          <div class="login-form__submit">
+            <button type="submit" class="btn btn--primary btn--full" id="loginBtn">로그인</button>
+
+            <div style="text-align: center; margin-top: 15px;">
+              <button type="button" id="showResetBtn" style="color: #888; background: none; border: none; font-size: 14px; text-decoration: underline; cursor: pointer;">비밀번호를 잊어버리셨나요?</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div id="resetSection" style="display: none; width: 100%;">
+        <h2 style="font-size: 18px; margin-bottom: 10px; color: #333; text-align: center;">비밀번호 재설정</h2>
+        <p style="font-size: 13px; color: #666; text-align: center; margin-bottom: 20px;">가입하신 이메일로 인증번호를 보내드립니다.</p>
+        
+        <form id="resetRequestForm">
+          <div class="form-group">
+            <label class="form-group__label">이메일 주소</label>
+            <input type="email" id="resetEmail" class="input" placeholder="example@lookeng.com" required>
+          </div>
+          <button type="submit" id="sendCodeBtn" class="btn btn--primary btn--full">인증번호 발송</button>
+        </form>
+
+        <form id="resetConfirmForm" style="display: none; margin-top: 20px; border-top: 1px dashed #e0e0e0; padding-top: 20px;">
+          <div class="form-group">
+            <label class="form-group__label">인증번호 (5자리)</label>
+            <input type="text" id="resetToken" class="input" placeholder="인증번호 5자리" maxlength="5" required>
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">새 비밀번호</label>
+            <input type="password" id="newPassword" class="input" placeholder="새 비밀번호" required>
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">새 비밀번호 확인</label>
+            <input type="password" id="confirmPassword" class="input" placeholder="새 비밀번호 다시 입력" required>
+          </div>
+          <button type="submit" class="btn btn--secondary btn--full" style="margin-top: 10px;">비밀번호 변경 완료</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px;">
+          <button type="button" id="showLoginBtn" style="color: #888; background: none; border: none; font-size: 14px; text-decoration: underline; cursor: pointer;">로그인 화면으로 돌아가기</button>
         </div>
-        <div class="form-group">
-          <label class="form-group__label" for="loginPassword">비밀번호</label>
-          <input type="password" class="input" id="loginPassword" placeholder="비밀번호 입력" autocomplete="current-password" />
-          <p class="form-group__error" id="loginError"></p>
-        </div>
-        <div class="login-form__submit">
-          <button type="submit" class="btn btn--primary btn--full" id="loginBtn">로그인</button>
-        </div>
-      </form>
+      </div>
 
       <!-- 회원가입 폼 -->
       <form class="login-form" id="signupForm" hidden>

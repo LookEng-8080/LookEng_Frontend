@@ -169,6 +169,90 @@ const adminCode = document.getElementById('signupAdminCode') ? document.getEleme
   }
 });
 
+// ======= 기존 login.js 코드 맨 아래에 아래 코드를 그대로 붙여넣으세요 =======
+
+// --- 화면 전환 로직 ---
+const loginSection = document.getElementById('loginSection');
+const resetSection = document.getElementById('resetSection');
+
+document.getElementById('showResetBtn')?.addEventListener('click', () => {
+  loginSection.style.display = 'none';
+  resetSection.style.display = 'block';
+});
+
+document.getElementById('showLoginBtn')?.addEventListener('click', () => {
+  resetSection.style.display = 'none';
+  loginSection.style.display = 'block';
+});
+
+// --- 비밀번호 재설정 로직 ---
+const resetRequestForm = document.getElementById('resetRequestForm');
+const resetConfirmForm = document.getElementById('resetConfirmForm');
+const resetEmailInput = document.getElementById('resetEmail');
+const sendCodeBtn = document.getElementById('sendCodeBtn');
+
+// 1단계: 인증번호 요청
+resetRequestForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = resetEmailInput.value.trim();
+  sendCodeBtn.disabled = true;
+  sendCodeBtn.textContent = '발송 중...';
+
+  try {
+    const res = await AuthApi.requestPasswordReset(email);
+    if (res && res.success) {
+      alert('인증번호가 이메일로 발송되었습니다.');
+      resetEmailInput.disabled = true;
+      sendCodeBtn.style.display = 'none';
+      resetConfirmForm.style.display = 'block';
+    } else {
+      alert(res?.message || '인증번호 발송 실패. 이메일을 확인해 주세요.');
+      sendCodeBtn.disabled = false;
+      sendCodeBtn.textContent = '인증번호 발송';
+    }
+  } catch (error) {
+    alert('서버 통신 오류가 발생했습니다.');
+    sendCodeBtn.disabled = false;
+    sendCodeBtn.textContent = '인증번호 발송';
+  }
+});
+
+// 2단계: 인증번호 확인 및 비밀번호 변경
+resetConfirmForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = resetEmailInput.value.trim();
+  const token = document.getElementById('resetToken').value.trim();
+  const newPassword = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  if (newPassword !== confirmPassword) {
+    alert('새 비밀번호가 서로 일치하지 않습니다.');
+    return;
+  }
+
+  try {
+    const res = await AuthApi.resetPassword(email, token, newPassword);
+    if (res && res.success) {
+      alert('비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해 주세요.');
+      // 폼 초기화 및 로그인 화면으로 복귀
+      resetConfirmForm.reset();
+      resetRequestForm.reset();
+      resetEmailInput.disabled = false;
+      sendCodeBtn.style.display = 'block';
+      sendCodeBtn.disabled = false;
+      sendCodeBtn.textContent = '인증번호 발송';
+      resetConfirmForm.style.display = 'none';
+      
+      resetSection.style.display = 'none';
+      loginSection.style.display = 'block';
+    } else {
+      alert(res?.message || '비밀번호 변경 실패. 인증번호를 확인해 주세요.');
+    }
+  } catch (error) {
+    alert('서버 통신 오류가 발생했습니다.');
+  }
+});
+
 // ── 유틸 ─────────────────────────────────────────────────────
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
