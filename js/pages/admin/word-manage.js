@@ -8,26 +8,47 @@ auth.requireAdmin();
 // 2. 사이드바 렌더링
 buildSidebar('admin-word');
 
-// ── 상태 ─────────────────────────────────────────────────────
-const PAGE_SIZE = 20;
-let currentPage = 0;
-let totalPages  = 0;
-let editingWordId = null; // null이면 추가 모드, 숫자이면 수정 모드
-let wordCache = {};       // { [id]: wordData } — 수정 시 기존 값 참조용
-let selectedPos = null;   // 품사 선택 상태
+// ── 상수 ─────────────────────────────────────────────────────
+const PAGE_SIZE          = 20;
+const MAX_CSV_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const CSV_SAMPLE_HEADER  = 'english,korean,partOfSpeech,exampleSentence,pronunciationUrl\n';
+const CSV_SAMPLE_ROWS    = 'abundant,풍부한,adjective,The region has abundant natural resources.,\napple,사과,noun,I eat an apple.,https://example.com/audio/apple.mp3';
+const POS_OPTIONS        = ['Noun', 'Verb', 'Adjective', 'Adverb', 'Preposition', 'Conjunction'];
 
-const POS_OPTIONS = ['Noun', 'Verb', 'Adjective', 'Adverb', 'Preposition', 'Conjunction'];
+// ── 단어 목록 상태 ────────────────────────────────────────────
+let currentPage   = 0;
+let totalPages    = 0;
+let editingWordId = null;
+let wordCache     = {};
+let selectedPos   = null;
 
-// ── DOM 참조 ─────────────────────────────────────────────────
-const wordList    = document.getElementById('wordList');
-const pagination  = document.getElementById('pagination');
-const wordModal   = document.getElementById('wordModal');
-const modalTitle  = document.getElementById('modalTitle');
+// ── CSV 상태 ──────────────────────────────────────────────────
+let selectedFile = null;
+
+// ── DOM 참조: 단어 목록 ───────────────────────────────────────
+const wordList     = document.getElementById('wordList');
+const pagination   = document.getElementById('pagination');
+const wordModal    = document.getElementById('wordModal');
+const modalTitle   = document.getElementById('modalTitle');
 const fieldEnglish = document.getElementById('fieldEnglish');
 const fieldMeaning = document.getElementById('fieldMeaning');
 const fieldExample = document.getElementById('fieldExample');
 
-// ── 품사 버튼 초기화 ──────────────────────────────────────────
+// ── DOM 참조: CSV 업로드 ──────────────────────────────────────
+const csvDropZone       = document.getElementById('csvDropZone');
+const csvFileInput      = document.getElementById('csvFileInput');
+const csvFileInfo       = document.getElementById('csvFileInfo');
+const csvFileName       = document.getElementById('csvFileName');
+const csvFileSize       = document.getElementById('csvFileSize');
+const csvClearBtn       = document.getElementById('csvClearBtn');
+const csvUploadBtn      = document.getElementById('csvUploadBtn');
+const csvResult         = document.getElementById('csvResult');
+const csvSampleDownload = document.getElementById('csvSampleDownload');
+
+// ══════════════════════════════════════════════════════════════
+// 품사 버튼
+// ══════════════════════════════════════════════════════════════
+
 function initPosButtons() {
   const container = document.getElementById('posButtons');
   container.innerHTML = POS_OPTIONS.map(pos =>
@@ -52,7 +73,10 @@ function setPosBtnActive(pos) {
   selectedPos = pos || null;
 }
 
-// ── 단어 목록 로드 ────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// 단어 목록
+// ══════════════════════════════════════════════════════════════
+
 async function loadWords(page) {
   try {
     const res = await WordApi.getList(page, PAGE_SIZE);
@@ -73,7 +97,6 @@ async function loadWords(page) {
   }
 }
 
-// ── 단어 카드 렌더링 ─────────────────────────────────────────
 function renderWordList(words) {
   if (!words.length) {
     wordList.innerHTML = `
@@ -110,7 +133,10 @@ function renderWordList(words) {
   }).join('');
 }
 
-// ── 모달 열기/닫기 ─────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// 모달 (단어 추가 / 수정)
+// ══════════════════════════════════════════════════════════════
+
 function openModal(mode, word = null) {
   editingWordId = mode === 'edit' ? word.id : null;
   modalTitle.textContent = mode === 'edit' ? '단어 수정' : '단어 추가';
@@ -136,7 +162,6 @@ function closeModal() {
   editingWordId = null;
 }
 
-// ── 저장 (추가 / 수정) ────────────────────────────────────────
 async function handleSave() {
   const english         = fieldEnglish.value.trim();
   const meaning         = fieldMeaning.value.trim();
@@ -152,7 +177,6 @@ async function handleSave() {
   try {
     let res;
     if (editingWordId) {
-      // 수정: 변경된 필드만 전송 (PATCH)
       const prev = wordCache[editingWordId] || {};
       const payload = {};
       if (english         !== (prev.english         || '')) payload.english         = english;
@@ -163,9 +187,8 @@ async function handleSave() {
       if (!Object.keys(payload).length) { showToast('변경된 내용이 없습니다.', 'info'); return; }
       res = await WordApi.update(editingWordId, payload);
     } else {
-      // 추가
       const payload = { english, korean: meaning };
-      if (selectedPos)     payload.partOfSpeech  = selectedPos;
+      if (selectedPos)     payload.partOfSpeech   = selectedPos;
       if (exampleSentence) payload.exampleSentence = exampleSentence;
       res = await WordApi.create(payload);
     }
@@ -186,7 +209,10 @@ async function handleSave() {
   }
 }
 
-// ── 삭제 ─────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// 삭제
+// ══════════════════════════════════════════════════════════════
+
 async function handleDelete(id) {
   const word = wordCache[id];
   const label = word ? `'${word.english}'` : '이 단어';
@@ -200,7 +226,6 @@ async function handleDelete(id) {
     }
     delete wordCache[id];
     showToast('단어가 삭제되었습니다.', 'success');
-    // 현재 페이지가 마지막이고 1개만 남았으면 이전 페이지로
     const nextPage = (wordList.querySelectorAll('.word-card[data-word-id]').length === 1 && currentPage > 0)
       ? currentPage - 1 : currentPage;
     await loadWords(nextPage);
@@ -209,18 +234,132 @@ async function handleDelete(id) {
   }
 }
 
-// ── 이벤트 바인딩 ─────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// CSV 일괄 업로드
+// ══════════════════════════════════════════════════════════════
+
+function initCsvUpload() {
+  // 1. 샘플 파일 Blob URL 생성
+  const sampleBlob = new Blob([CSV_SAMPLE_HEADER + CSV_SAMPLE_ROWS], { type: 'text/csv' });
+  csvSampleDownload.href = URL.createObjectURL(sampleBlob);
+
+  // 2. 클릭으로 파일 선택
+  csvDropZone.addEventListener('click', () => csvFileInput.click());
+  csvDropZone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') csvFileInput.click();
+  });
+
+  // 3. 파일 input change
+  csvFileInput.addEventListener('change', () => {
+    if (csvFileInput.files.length > 0) applyFile(csvFileInput.files[0]);
+  });
+
+  // 4. 드래그앤드롭
+  csvDropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    csvDropZone.classList.add('csv-drop-zone--active');
+  });
+  csvDropZone.addEventListener('dragleave', () => {
+    csvDropZone.classList.remove('csv-drop-zone--active');
+  });
+  csvDropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    csvDropZone.classList.remove('csv-drop-zone--active');
+    const file = e.dataTransfer.files[0];
+    if (file) applyFile(file);
+  });
+
+  // 5. 버튼 이벤트
+  csvClearBtn.addEventListener('click', clearCsvFile);
+  csvUploadBtn.addEventListener('click', handleCsvUpload);
+}
+
+function applyFile(file) {
+  if (!file.name.toLowerCase().endsWith('.csv')) {
+    showToast('.csv 파일만 업로드할 수 있습니다.', 'error');
+    return;
+  }
+  if (file.size > MAX_CSV_SIZE_BYTES) {
+    showToast('파일 크기가 5MB를 초과합니다.', 'error');
+    return;
+  }
+
+  selectedFile          = file;
+  csvFileName.textContent = file.name;
+  csvFileSize.textContent = formatFileSize(file.size);
+  csvFileInfo.hidden    = false;
+  csvUploadBtn.disabled = false;
+  clearCsvResult();
+}
+
+function clearCsvFile() {
+  selectedFile          = null;
+  csvFileInput.value    = '';
+  csvFileInfo.hidden    = true;
+  csvUploadBtn.disabled = true;
+  clearCsvResult();
+}
+
+async function handleCsvUpload() {
+  if (!selectedFile) return;
+
+  csvUploadBtn.disabled    = true;
+  csvUploadBtn.textContent = '업로드 중...';
+  clearCsvResult();
+
+  try {
+    const res = await WordApi.bulkUpload(selectedFile);
+    if (!res) return;
+
+    if (res.success) {
+      const { totalRequested, successCount, failCount } = res.data;
+      showCsvResult('success',
+        `✅ 업로드 완료 — 총 ${totalRequested}개 중 ${successCount}개 추가됨` +
+        (failCount > 0 ? ` (실패: ${failCount}개)` : '')
+      );
+      clearCsvFile();
+      await loadWords(0);
+    } else {
+      showCsvResult('error', `❌ ${res.message}`);
+    }
+  } catch {
+    showCsvResult('error', '❌ 네트워크 오류가 발생했습니다.');
+  } finally {
+    csvUploadBtn.textContent = '업로드';
+    csvUploadBtn.disabled    = (selectedFile === null);
+  }
+}
+
+function showCsvResult(type, message) {
+  csvResult.hidden      = false;
+  csvResult.className   = `csv-result csv-result--${type}`;
+  csvResult.textContent = message;
+}
+
+function clearCsvResult() {
+  csvResult.hidden      = true;
+  csvResult.textContent = '';
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024)        return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// 이벤트 바인딩
+// ══════════════════════════════════════════════════════════════
+
 document.getElementById('addWordBtn').addEventListener('click', () => openModal('add'));
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('cancelBtn').addEventListener('click', closeModal);
 document.getElementById('saveBtn').addEventListener('click', handleSave);
 
-// 모달 오버레이 클릭 시 닫기
 wordModal.addEventListener('click', (e) => {
   if (e.target === wordModal) closeModal();
 });
 
-// 이벤트 위임: 수정/삭제 버튼
 wordList.addEventListener('click', (e) => {
   const editBtn   = e.target.closest('.edit-btn');
   const deleteBtn = e.target.closest('.delete-btn');
@@ -235,7 +374,6 @@ wordList.addEventListener('click', (e) => {
   }
 });
 
-// Enter 키로 저장
 wordModal.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
     e.preventDefault();
@@ -244,6 +382,9 @@ wordModal.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeModal();
 });
 
-// ── 초기 로드 ────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// 초기 로드
+// ══════════════════════════════════════════════════════════════
 initPosButtons();
+initCsvUpload();
 loadWords(0);

@@ -19,6 +19,60 @@
         <button class="btn btn--primary" id="addWordBtn">+ 새 단어 추가</button>
       </div>
 
+      <!-- CSV 일괄 추가 섹션 -->
+      <section class="csv-upload-section" aria-labelledby="csvSectionTitle">
+        <h3 id="csvSectionTitle" class="csv-upload-section__title">CSV 일괄 단어 추가</h3>
+
+        <!-- 드래그앤드롭 / 클릭 업로드 영역 -->
+        <div
+          id="csvDropZone"
+          class="csv-drop-zone"
+          role="button"
+          tabindex="0"
+          aria-label="CSV 파일을 드래그하거나 클릭하여 선택"
+        >
+          <svg class="csv-drop-zone__icon" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M24 4L24 32M24 4L14 14M24 4L34 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M6 34v6a2 2 0 0 0 2 2h32a2 2 0 0 0 2-2v-6" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/>
+          </svg>
+          <p class="csv-drop-zone__text">
+            CSV 파일을 여기에 드래그하거나 <span class="csv-drop-zone__link">클릭하여 선택</span>
+          </p>
+          <p class="csv-drop-zone__hint">최대 5MB · 1,000행 이하 · .csv 형식만 허용</p>
+          <input type="file" id="csvFileInput" accept=".csv" class="csv-drop-zone__input" aria-hidden="true" tabindex="-1" />
+        </div>
+
+        <!-- 선택된 파일 정보 -->
+        <div id="csvFileInfo" class="csv-file-info" hidden>
+          <span id="csvFileName" class="csv-file-info__name"></span>
+          <span id="csvFileSize" class="csv-file-info__size"></span>
+          <button id="csvClearBtn" class="btn btn--ghost btn--sm" type="button">✕</button>
+        </div>
+
+        <!-- CSV 포맷 안내 -->
+        <details class="csv-format-guide">
+          <summary class="csv-format-guide__toggle">CSV 파일 포맷 안내 보기</summary>
+          <div class="csv-format-guide__body">
+            <p>파일의 첫 줄은 아래 헤더여야 합니다. (순서 동일)</p>
+            <pre class="csv-format-guide__code">english,korean,partOfSpeech,exampleSentence,pronunciationUrl</pre>
+            <p>예시:</p>
+            <pre class="csv-format-guide__code">abundant,풍부한,adjective,The region has abundant natural resources.,
+apple,사과,noun,I eat an apple.,https://example.com/audio/apple.mp3</pre>
+            <ul class="csv-format-guide__notes">
+              <li><code>english</code>, <code>korean</code> — 필수</li>
+              <li><code>partOfSpeech</code>, <code>exampleSentence</code>, <code>pronunciationUrl</code> — 선택</li>
+              <li>이미 등록된 영단어가 포함되면 전체 업로드가 실패합니다 (409)</li>
+            </ul>
+            <a id="csvSampleDownload" class="btn btn--ghost btn--sm" href="#" download="lookeng_sample.csv">샘플 파일 다운로드</a>
+          </div>
+        </details>
+
+        <div class="csv-upload-section__footer">
+          <button id="csvUploadBtn" class="btn btn--primary" type="button" disabled>업로드</button>
+          <div id="csvResult" class="csv-result" hidden role="status" aria-live="polite"></div>
+        </div>
+      </section>
+
       <!-- 단어 리스트 -->
       <ul class="word-list" id="wordList"></ul>
 
