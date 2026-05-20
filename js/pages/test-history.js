@@ -39,12 +39,12 @@ function renderTable(records) {
     return;
   }
 
-  const quizTypeLabel = { SHORT_ANSWER: '주관식', MULTIPLE_CHOICE: '객관식' };
+  const quizTypeLabel = { SHORT_ANSWER: '주관식', MULTIPLE_CHOICE: '객관식', FILL_IN_BLANK: '빈칸채우기' };
 
   tbody.innerHTML = records.map(r => `
     <tr>
       <td>${formatDate(r.startedAt)}</td>
-      <td>${quizTypeLabel[r.quizType] ?? r.quizType}</td>
+      <td><span class="session-row__type">${quizTypeLabel[r.quizType] ?? r.quizType}</span></td>
       <td>${r.totalCount}문제</td>
       <td><strong>${r.accuracy}%</strong></td>
       <td>${formatDuration(r.durationSec)}</td>

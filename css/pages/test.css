@@ -57,7 +57,48 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  align-items: start;
+  align-items: stretch;   /* 양쪽 카드 높이 동일 */
+}
+
+/* ── 가이드 유형별 패널 ── */
+.guide-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 객관식/빈칸 가이드 미리보기 선택지 */
+.guide-choices-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.guide-choice-item {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-en);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.guide-choice-item--correct {
+  border-color: var(--color-success);
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+/* ── 하단 최근 기록 박스 (독립) ── */
+.recent-history-box {
+  margin-top: 24px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 28px 36px;
+  box-shadow: var(--shadow-card);
 }
 
 /* ── 설정 화면 ── */
@@ -107,7 +148,7 @@
   cursor: pointer;
 }
 
-/* 퀴즈 타입 칩 */
+/* 테스트 유형 칩 */
 .chip-group {
   display: flex;
   gap: 10px;
@@ -115,16 +156,17 @@
 
 .chip {
   flex: 1;
-  padding: 10px 16px;
+  padding: 14px 10px;
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
   text-align: center;
+  white-space: nowrap;
 }
 
 .chip:hover { border-color: var(--color-blue-primary); color: var(--color-blue-primary); }
@@ -311,6 +353,15 @@
 .quiz-word-card__pos     { font-size: 0.85rem; color: rgba(255,255,255,0.5); font-family: var(--font-en); }
 .quiz-word-card__word    { font-size: 2.25rem; font-weight: 800; font-family: var(--font-en); line-height: 1.1; }
 .quiz-word-card__sentence { font-size: 0.875rem; color: rgba(255,255,255,0.55); font-style: italic; max-width: 480px; line-height: 1.5; }
+
+/* FILL_IN_BLANK — 예문을 메인으로 강조 */
+.quiz-word-card--fib .quiz-word-card__sentence {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.9);
+  font-style: normal;
+  line-height: 1.7;
+  max-width: 520px;
+}
 
 /* 주관식 입력 */
 .quiz-instruction {
@@ -499,23 +550,15 @@
   color: var(--color-text-muted);
 }
 
-/* ── 설정 화면: 최근 기록 ── */
-.recent-history {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--color-border);
-}
-
+/* ── 하단 최근 기록: 타이틀 / 행 스타일 ── */
 .recent-history__title {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 10px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 14px;
 }
 
-/* session-row 그리드: 날짜 | 유형 | 문제수 | 정답률 (duration 제외) */
-.recent-history .session-row {
-  grid-template-columns: 90px 60px 60px 1fr;
+/* session-row 그리드: 날짜 | 유형 | 문제수 | 정답률 */
+.recent-history-box .session-row {
+  grid-template-columns: 100px 72px 64px 1fr;
 }

@@ -235,7 +235,7 @@ export function createEyeSvg(size = 1) {
 //     {
 //       key: 'test',
 //       href: `${prefix}test.html`,
-//       label: '단어 퀴즈 세션',
+//       label: '단어 테스트 세션',
 //       icon: `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
 //         <circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.5"/>
 //         <circle cx="9" cy="9" r="3" fill="currentColor"/>
@@ -322,11 +322,11 @@ export function buildSidebar(activeMenu) {
 
   const navItems = isAdmin ? [
     { key: 'admin-word', href: `${prefix}admin/word-manage.html`, label: '단어장 관리', icon: '📝' },
-    { key: 'admin-quiz', href: `${prefix}admin/quiz-session.html`, label: '단어 퀴즈 세션', icon: '🎯' },
+    { key: 'admin-quiz', href: `${prefix}admin/quiz-session.html`, label: '단어 테스트 세션', icon: '🎯' },
   ] : [
     { key: 'dashboard', href: `${prefix}dashboard.html`, label: '내 대시보드', icon: '📊' },
     { key: 'word-list', href: `${prefix}word-list.html`, label: '단어장', icon: '📖' },
-    { key: 'test', href: `${prefix}test.html`, label: '단어 퀴즈', icon: '🎯' },
+    { key: 'test', href: `${prefix}test.html`, label: '단어 테스트', icon: '🎯' },
     { key: 'test-history', href: `${prefix}test-history.html`, label: '테스트 기록', icon: '📋' },
   ];
 

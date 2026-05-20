@@ -5,6 +5,12 @@ import { showToast, formatDuration, formatDate, buildSidebar } from '../utils.js
 auth.requireLogin();
 buildSidebar('test');
 
+const QUIZ_TYPE_LABEL = {
+  SHORT_ANSWER:   '주관식',
+  MULTIPLE_CHOICE: '객관식',
+  FILL_IN_BLANK:  '빈칸채우기',
+};
+
 // ── 최근 기록 로드 ────────────────────────────────────────────
 async function loadRecentHistory() {
   try {
@@ -15,7 +21,6 @@ async function loadRecentHistory() {
     const listEl  = document.getElementById('recentHistoryList');
     const wrapEl  = document.getElementById('recentHistory');
 
-    const QUIZ_TYPE_LABEL = { SHORT_ANSWER: '주관식', MULTIPLE_CHOICE: '객관식' };
     listEl.innerHTML = records.map(r => {
       const accuracyClass = r.accuracy >= 80 ? 'high' : r.accuracy >= 50 ? 'mid' : 'low';
       return `
@@ -36,12 +41,31 @@ async function loadRecentHistory() {
 
 loadRecentHistory();
 
+// ── 테스트 유형 선택 ──────────────────────────────────────────
+let selectedQuizType = 'SHORT_ANSWER';
+
+document.querySelectorAll('.chip[data-quiz-type]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    // 1. 활성 칩 전환
+    document.querySelectorAll('.chip[data-quiz-type]').forEach(c => c.classList.remove('chip--active'));
+    chip.classList.add('chip--active');
+
+    // 2. 상태 업데이트
+    selectedQuizType = chip.dataset.quizType;
+
+    // 3. 가이드 패널 전환
+    document.querySelectorAll('.guide-content').forEach(g => { g.hidden = true; });
+    document.getElementById(`guide-${selectedQuizType}`).hidden = false;
+  });
+});
+
 // ── 상태 ─────────────────────────────────────────────────────
-let sessionId       = null;
-let totalCount      = 10;
-let currentIndex    = 0;
-let currentQuestion = null;
-let startTime       = null;
+let sessionId        = null;
+let totalCount       = 10;
+let currentIndex     = 0;
+let currentQuestion  = null;
+let startTime        = null;
+let currentQuizType  = 'SHORT_ANSWER';
 
 // ── 화면 전환 ─────────────────────────────────────────────────
 function showView(id) {
@@ -67,16 +91,17 @@ async function startTest() {
   btn.textContent = '불러오는 중...';
 
   try {
-    const res = await TestApi.start(totalCount, 'SHORT_ANSWER');
+    const res = await TestApi.start(totalCount, selectedQuizType);
     if (!res || !res.success) {
       showToast(res?.message || '테스트를 시작할 수 없습니다.', 'error');
       return;
     }
 
-    sessionId    = res.data.sessionId;
-    totalCount   = res.data.totalCount;
-    currentIndex = 0;
-    startTime    = Date.now();
+    sessionId       = res.data.sessionId;
+    totalCount      = res.data.totalCount;
+    currentIndex    = 0;
+    startTime       = Date.now();
+    currentQuizType = selectedQuizType;
 
     initDots(totalCount);
     showView('quizView');
@@ -89,26 +114,53 @@ async function startTest() {
   }
 }
 
-// ── 문제 렌더링 (한글 뜻 표시 → 영단어 입력) ──────────────────
+// ── 문제 렌더링 ───────────────────────────────────────────────
 function renderQuestion(question) {
   currentQuestion = question;
-
-  document.getElementById('qPos').textContent      = question.partOfSpeech || '';
-  document.getElementById('qWord').textContent     = question.korean;
-  document.getElementById('qSentence').textContent = question.exampleSentence || '';
 
   const progressPct = Math.round((currentIndex / totalCount) * 100);
   document.getElementById('progressText').textContent = `${currentIndex + 1} / ${totalCount}`;
   document.getElementById('progressFill').style.width = `${progressPct}%`;
 
-  const input = document.getElementById('answerInput');
-  input.value = '';
-  input.disabled = false;
-  input.focus();
+  const card = document.querySelector('.quiz-word-card');
+  document.getElementById('qPos').textContent = question.partOfSpeech || '';
 
-  const confirmBtn = document.getElementById('confirmBtn');
-  confirmBtn.disabled = false;
-  confirmBtn.textContent = '확인';
+  if (currentQuizType === 'FILL_IN_BLANK') {
+    card.classList.add('quiz-word-card--fib');
+    document.getElementById('qWord').textContent     = '';
+    document.getElementById('qSentence').textContent = question.sentence || '';
+  } else {
+    card.classList.remove('quiz-word-card--fib');
+    document.getElementById('qWord').textContent     = question.korean;
+    document.getElementById('qSentence').textContent =
+      currentQuizType === 'SHORT_ANSWER' ? (question.exampleSentence || '') : '';
+  }
+
+  if (currentQuizType === 'SHORT_ANSWER') {
+    document.getElementById('shortAnswerArea').hidden = false;
+    document.getElementById('choicesArea').hidden     = true;
+    const input = document.getElementById('answerInput');
+    input.value    = '';
+    input.disabled = false;
+    input.focus();
+    const confirmBtn = document.getElementById('confirmBtn');
+    confirmBtn.disabled    = false;
+    confirmBtn.textContent = '확인';
+  } else {
+    document.getElementById('shortAnswerArea').hidden = true;
+    document.getElementById('choicesArea').hidden     = false;
+    renderChoices(question.choices || []);
+  }
+}
+
+function renderChoices(choices) {
+  const grid = document.getElementById('choicesGrid');
+  grid.innerHTML = choices.map(c =>
+    `<button class="choice-btn" data-choice="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+  ).join('');
+  grid.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => submitAnswer(btn.dataset.choice));
+  });
 }
 
 // ── 주관식 제출 ───────────────────────────────────────────────
@@ -127,25 +179,39 @@ document.getElementById('answerInput').addEventListener('keydown', (e) => {
 });
 
 // ── 답안 제출 ────────────────────────────────────────────────
+function lockInput() {
+  if (currentQuizType === 'SHORT_ANSWER') {
+    document.getElementById('confirmBtn').disabled    = true;
+    document.getElementById('answerInput').disabled   = true;
+  } else {
+    document.querySelectorAll('#choicesGrid .choice-btn').forEach(b => { b.disabled = true; });
+  }
+}
+
+function unlockInput() {
+  if (currentQuizType === 'SHORT_ANSWER') {
+    document.getElementById('confirmBtn').disabled    = false;
+    document.getElementById('answerInput').disabled   = false;
+  } else {
+    document.querySelectorAll('#choicesGrid .choice-btn').forEach(b => { b.disabled = false; });
+  }
+}
+
 async function submitAnswer(userInput) {
-  const confirmBtn = document.getElementById('confirmBtn');
-  const input      = document.getElementById('answerInput');
-  confirmBtn.disabled = true;
-  input.disabled      = true;
+  lockInput();
 
   try {
     const res = await TestApi.submitAnswer(sessionId, currentQuestion.wordId, userInput);
     if (!res || !res.success) {
       showToast(res?.message || '오류가 발생했습니다.', 'error');
-      confirmBtn.disabled = false;
-      input.disabled      = false;
+      unlockInput();
       return;
     }
 
     // Jackson boolean 직렬화: isCorrect→correct, isFinished→finished
     const { correct, finished, nextQuestion } = res.data;
 
-    showFeedback(correct);
+    showFeedback(correct, userInput);
     updateDot(currentIndex, correct);
 
     setTimeout(async () => {
@@ -158,16 +224,23 @@ async function submitAnswer(userInput) {
     }, 800);
   } catch {
     showToast('네트워크 오류가 발생했습니다.', 'error');
-    confirmBtn.disabled = false;
-    input.disabled      = false;
+    unlockInput();
   }
 }
 
 // ── 정/오답 피드백 ────────────────────────────────────────────
-function showFeedback(isCorrect) {
-  const input = document.getElementById('answerInput');
-  input.style.borderColor = isCorrect ? 'var(--color-success)' : 'var(--color-danger)';
-  setTimeout(() => { input.style.borderColor = ''; }, 700);
+function showFeedback(isCorrect, userInput) {
+  if (currentQuizType === 'SHORT_ANSWER') {
+    const input = document.getElementById('answerInput');
+    input.style.borderColor = isCorrect ? 'var(--color-success)' : 'var(--color-danger)';
+    setTimeout(() => { input.style.borderColor = ''; }, 700);
+  } else {
+    document.querySelectorAll('#choicesGrid .choice-btn').forEach(btn => {
+      if (btn.dataset.choice === userInput) {
+        btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      }
+    });
+  }
 }
 
 // ── 도트 인디케이터 ───────────────────────────────────────────
@@ -217,7 +290,7 @@ function renderResult(data) {
   const wrongSection = document.getElementById('wrongAnswerSection');
   if (wrongWords && wrongWords.length > 0) {
     wrongSection.hidden = false;
-    // 퀴즈 방향: 한글 뜻 표시 → 영단어 입력
+    // 테스트 방향: 한글 뜻 표시 → 영단어 입력
     // wrongWords[i]: { english(정답), korean(출제된 한글 뜻), userInput(내 답) }
     document.getElementById('wrongAnswerBody').innerHTML = wrongWords.map(w =>
       `<tr>
