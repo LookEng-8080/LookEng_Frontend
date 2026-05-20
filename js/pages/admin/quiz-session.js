@@ -50,7 +50,7 @@ function renderUserGrid(users) {
 
 // ── 유저 세션 기록 모달 오픈 ──────────────────────────────────
 async function openSessionModal(userId, userName) {
-  modalUserName.textContent = `${userName}의 퀴즈 기록`;
+  modalUserName.textContent = `${userName}의 테스트 기록`;
   sessionList.innerHTML = '<div class="session-list__loading">불러오는 중…</div>';
   sessionsModal.classList.add('is-open');
 
@@ -77,7 +77,7 @@ function getAccuracyClass(accuracy) {
 
 function renderSessionList(records) {
   if (!records || !records.length) {
-    sessionList.innerHTML = '<div class="session-list__empty">퀴즈 기록이 없습니다.</div>';
+    sessionList.innerHTML = '<div class="session-list__empty">테스트 기록이 없습니다.</div>';
     return;
   }
 

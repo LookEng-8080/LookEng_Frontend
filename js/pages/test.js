@@ -41,7 +41,7 @@ async function loadRecentHistory() {
 
 loadRecentHistory();
 
-// ── 퀴즈 유형 선택 ───────────────────────────────────────────
+// ── 테스트 유형 선택 ──────────────────────────────────────────
 let selectedQuizType = 'SHORT_ANSWER';
 
 document.querySelectorAll('.chip[data-quiz-type]').forEach(chip => {
@@ -240,7 +240,7 @@ function renderResult(data) {
   const wrongSection = document.getElementById('wrongAnswerSection');
   if (wrongWords && wrongWords.length > 0) {
     wrongSection.hidden = false;
-    // 퀴즈 방향: 한글 뜻 표시 → 영단어 입력
+    // 테스트 방향: 한글 뜻 표시 → 영단어 입력
     // wrongWords[i]: { english(정답), korean(출제된 한글 뜻), userInput(내 답) }
     document.getElementById('wrongAnswerBody').innerHTML = wrongWords.map(w =>
       `<tr>

@@ -148,7 +148,7 @@
   cursor: pointer;
 }
 
-/* 퀴즈 타입 칩 */
+/* 테스트 유형 칩 */
 .chip-group {
   display: flex;
   gap: 10px;

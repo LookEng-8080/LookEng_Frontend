@@ -274,7 +274,7 @@
 
 .pagination__btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* ── 넓은 모달 (퀴즈 세션 기록 등) ── */
+/* ── 넓은 모달 (테스트 세션 기록 등) ── */
 .modal--wide {
   max-width: 620px;
 }
@@ -310,7 +310,7 @@
   color: #fff;
 }
 
-/* ── 사용자 그리드 (퀴즈 세션 페이지) ── */
+/* ── 사용자 그리드 (테스트 세션 페이지) ── */
 .user-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
