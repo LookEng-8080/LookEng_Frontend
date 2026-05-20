@@ -5,6 +5,12 @@ import { showToast, formatDuration, formatDate, buildSidebar } from '../utils.js
 auth.requireLogin();
 buildSidebar('test');
 
+const QUIZ_TYPE_LABEL = {
+  SHORT_ANSWER:   '주관식',
+  MULTIPLE_CHOICE: '객관식',
+  FILL_IN_BLANK:  '빈칸채우기',
+};
+
 // ── 최근 기록 로드 ────────────────────────────────────────────
 async function loadRecentHistory() {
   try {
@@ -15,7 +21,6 @@ async function loadRecentHistory() {
     const listEl  = document.getElementById('recentHistoryList');
     const wrapEl  = document.getElementById('recentHistory');
 
-    const QUIZ_TYPE_LABEL = { SHORT_ANSWER: '주관식', MULTIPLE_CHOICE: '객관식' };
     listEl.innerHTML = records.map(r => {
       const accuracyClass = r.accuracy >= 80 ? 'high' : r.accuracy >= 50 ? 'mid' : 'low';
       return `
@@ -35,6 +40,24 @@ async function loadRecentHistory() {
 }
 
 loadRecentHistory();
+
+// ── 퀴즈 유형 선택 ───────────────────────────────────────────
+let selectedQuizType = 'SHORT_ANSWER';
+
+document.querySelectorAll('.chip[data-quiz-type]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    // 1. 활성 칩 전환
+    document.querySelectorAll('.chip[data-quiz-type]').forEach(c => c.classList.remove('chip--active'));
+    chip.classList.add('chip--active');
+
+    // 2. 상태 업데이트
+    selectedQuizType = chip.dataset.quizType;
+
+    // 3. 가이드 패널 전환
+    document.querySelectorAll('.guide-content').forEach(g => { g.hidden = true; });
+    document.getElementById(`guide-${selectedQuizType}`).hidden = false;
+  });
+});
 
 // ── 상태 ─────────────────────────────────────────────────────
 let sessionId       = null;
@@ -67,7 +90,7 @@ async function startTest() {
   btn.textContent = '불러오는 중...';
 
   try {
-    const res = await TestApi.start(totalCount, 'SHORT_ANSWER');
+    const res = await TestApi.start(totalCount, selectedQuizType);
     if (!res || !res.success) {
       showToast(res?.message || '테스트를 시작할 수 없습니다.', 'error');
       return;

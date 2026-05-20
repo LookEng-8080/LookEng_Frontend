@@ -18,6 +18,8 @@
       <!-- 설정 화면 -->
       <section id="setupView">
         <h1 class="page-title" style="margin-bottom: 24px;">단어 퀴즈 세션</h1>
+
+        <!-- 상단: 설정 + 가이드 (같은 높이) -->
         <div class="setup-layout">
 
           <!-- 왼쪽: 퀴즈 설정 -->
@@ -34,58 +36,151 @@
               <div class="setup-field__hint">전체 단어 50개 중 랜덤으로 출제됩니다</div>
             </div>
 
-            <button class="btn btn--primary btn--full" id="startBtn" style="margin-top:16px">시작하기</button>
-
-            <!-- 최근 테스트 기록 -->
-            <div class="recent-history" id="recentHistory" hidden>
-              <p class="recent-history__title">최근 테스트 3개의 기록</p>
-              <div class="session-list" id="recentHistoryList"></div>
+            <!-- 퀴즈 유형 선택 -->
+            <div class="setup-field">
+              <div class="setup-field__label">
+                <span>퀴즈 유형</span>
+              </div>
+              <div class="chip-group">
+                <button class="chip chip--active" data-quiz-type="SHORT_ANSWER">주관식</button>
+                <button class="chip" data-quiz-type="MULTIPLE_CHOICE">객관식</button>
+                <button class="chip" data-quiz-type="FILL_IN_BLANK">빈칸채우기</button>
+              </div>
             </div>
+
+            <button class="btn btn--primary btn--full" id="startBtn">시작하기</button>
           </div>
 
-          <!-- 오른쪽: 테스트 설명 -->
+          <!-- 오른쪽: 유형별 가이드 -->
           <div class="setup-guide">
             <h2 class="setup-card__title">이렇게 진행돼요</h2>
 
-            <div class="guide-step">
-              <div class="guide-step__num">1</div>
-              <div class="guide-step__body">
-                <strong>한글 뜻이 카드로 표시됩니다</strong>
-                <p>품사와 예문도 함께 제공돼요</p>
-                <div class="guide-preview-card">
-                  <span class="guide-preview-card__pos">noun</span>
-                  <span class="guide-preview-card__word">사과</span>
-                  <span class="guide-preview-card__sentence">"I eat an apple every day."</span>
+            <!-- SHORT_ANSWER 가이드 -->
+            <div id="guide-SHORT_ANSWER" class="guide-content">
+              <div class="guide-step">
+                <div class="guide-step__num">1</div>
+                <div class="guide-step__body">
+                  <strong>한글 뜻이 카드로 표시됩니다</strong>
+                  <p>품사와 예문도 함께 제공돼요</p>
+                  <div class="guide-preview-card">
+                    <span class="guide-preview-card__pos">noun</span>
+                    <span class="guide-preview-card__word">사과</span>
+                    <span class="guide-preview-card__sentence">"I eat an apple every day."</span>
+                  </div>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="guide-step__num">2</div>
+                <div class="guide-step__body">
+                  <strong>영단어를 직접 입력하세요</strong>
+                  <p>대소문자는 구분하지 않아요</p>
+                  <div class="guide-input-preview">
+                    <span class="guide-input-preview__text">apple</span>
+                    <span class="guide-input-preview__cursor"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="guide-step__num">3</div>
+                <div class="guide-step__body">
+                  <strong>결과를 확인하세요</strong>
+                  <p>정답률 · 소요 시간 · 오답 목록을 확인할 수 있어요</p>
+                  <div class="guide-result-preview">
+                    <span class="guide-result-preview__score">80%</span>
+                    <span class="guide-result-preview__label">정답률</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="guide-step">
-              <div class="guide-step__num">2</div>
-              <div class="guide-step__body">
-                <strong>영단어를 직접 입력하세요</strong>
-                <p>대소문자는 구분하지 않아요</p>
-                <div class="guide-input-preview">
-                  <span class="guide-input-preview__text">apple</span>
-                  <span class="guide-input-preview__cursor"></span>
+            <!-- MULTIPLE_CHOICE 가이드 -->
+            <div id="guide-MULTIPLE_CHOICE" class="guide-content" hidden>
+              <div class="guide-step">
+                <div class="guide-step__num">1</div>
+                <div class="guide-step__body">
+                  <strong>한글 뜻이 카드로 표시됩니다</strong>
+                  <p>품사도 함께 제공돼요</p>
+                  <div class="guide-preview-card">
+                    <span class="guide-preview-card__pos">verb</span>
+                    <span class="guide-preview-card__word">버리다, 포기하다</span>
+                  </div>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="guide-step__num">2</div>
+                <div class="guide-step__body">
+                  <strong>4개 보기 중 정답을 고르세요</strong>
+                  <p>서버가 정답 1개 + 오답 3개를 랜덤으로 섞어 제공해요</p>
+                  <div class="guide-choices-preview">
+                    <span class="guide-choice-item guide-choice-item--correct">abandon</span>
+                    <span class="guide-choice-item">achieve</span>
+                    <span class="guide-choice-item">analyze</span>
+                    <span class="guide-choice-item">approve</span>
+                  </div>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="guide-step__num">3</div>
+                <div class="guide-step__body">
+                  <strong>결과를 확인하세요</strong>
+                  <p>정답률 · 소요 시간 · 오답 목록을 확인할 수 있어요</p>
+                  <div class="guide-result-preview">
+                    <span class="guide-result-preview__score">80%</span>
+                    <span class="guide-result-preview__label">정답률</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="guide-step">
-              <div class="guide-step__num">3</div>
-              <div class="guide-step__body">
-                <strong>결과를 확인하세요</strong>
-                <p>정답률 · 소요 시간 · 오답 목록을 확인할 수 있어요</p>
-                <div class="guide-result-preview">
-                  <span class="guide-result-preview__score">80%</span>
-                  <span class="guide-result-preview__label">정답률</span>
+            <!-- FILL_IN_BLANK 가이드 -->
+            <div id="guide-FILL_IN_BLANK" class="guide-content" hidden>
+              <div class="guide-step">
+                <div class="guide-step__num">1</div>
+                <div class="guide-step__body">
+                  <strong>빈칸이 있는 예문이 표시됩니다</strong>
+                  <p>예문 속 단어를 맞춰보세요</p>
+                  <div class="guide-preview-card">
+                    <span class="guide-preview-card__sentence" style="color:#fff; font-size:0.9rem; font-style:normal;">
+                      "He had to _____ his car in the snow."
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="guide-step__num">2</div>
+                <div class="guide-step__body">
+                  <strong>4개 보기 중 빈칸에 들어갈 단어를 고르세요</strong>
+                  <p>예문 문맥을 보고 정답을 추론해요</p>
+                  <div class="guide-choices-preview">
+                    <span class="guide-choice-item guide-choice-item--correct">abandon</span>
+                    <span class="guide-choice-item">achieve</span>
+                    <span class="guide-choice-item">analyze</span>
+                    <span class="guide-choice-item">approve</span>
+                  </div>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="guide-step__num">3</div>
+                <div class="guide-step__body">
+                  <strong>결과를 확인하세요</strong>
+                  <p>정답률 · 소요 시간 · 오답 목록을 확인할 수 있어요</p>
+                  <div class="guide-result-preview">
+                    <span class="guide-result-preview__score">80%</span>
+                    <span class="guide-result-preview__label">정답률</span>
+                  </div>
                 </div>
               </div>
             </div>
 
           </div>
         </div>
+
+        <!-- 하단: 최근 테스트 기록 (독립 박스) -->
+        <div class="recent-history-box" id="recentHistory" hidden>
+          <p class="recent-history__title">최근 테스트 3개의 기록</p>
+          <div class="session-list" id="recentHistoryList"></div>
+        </div>
+
       </section>
 
       <!-- 진행 화면 -->
