@@ -100,10 +100,10 @@
   cursor: pointer;
 }
 
-.grass-cell[data-level="1"] { background-color: #9BE9A8; }
-.grass-cell[data-level="2"] { background-color: #40C463; }
-.grass-cell[data-level="3"] { background-color: #30A14E; }
-.grass-cell[data-level="4"] { background-color: #216E39; }
+.grass-cell[data-level="1"] { background-color: #93C5FD; }
+.grass-cell[data-level="2"] { background-color: #3B82F6; }
+.grass-cell[data-level="3"] { background-color: #1D4ED8; }
+.grass-cell[data-level="4"] { background-color: #1E3A8A; }
 
 .grass-legend {
   display: flex;
