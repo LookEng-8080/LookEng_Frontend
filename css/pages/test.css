@@ -156,11 +156,11 @@
 
 .chip {
   flex: 1;
-  padding: 10px 16px;
+  padding: 14px 20px;
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--color-text-secondary);
   cursor: pointer;
