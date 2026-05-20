@@ -156,7 +156,7 @@
 
 .chip {
   flex: 1;
-  padding: 14px 20px;
+  padding: 14px 10px;
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
@@ -166,6 +166,7 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   text-align: center;
+  white-space: nowrap;
 }
 
 .chip:hover { border-color: var(--color-blue-primary); color: var(--color-blue-primary); }
