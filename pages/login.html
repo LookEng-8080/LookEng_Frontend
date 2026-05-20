@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../css/global.css" />
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/pages/login.css" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <div class="login-page">
@@ -53,6 +54,10 @@
           </div>
           <div class="login-form__submit">
             <button type="submit" class="btn btn--primary btn--full" id="loginBtn">로그인</button>
+
+            <div style="margin-top: 15px; width: 100%; display: flex; justify-content: center;">
+              <div id="googleLoginBtn"></div>
+            </div>
 
             <div style="text-align: center; margin-top: 15px;">
               <button type="button" id="showResetBtn" style="color: #888; background: none; border: none; font-size: 14px; text-decoration: underline; cursor: pointer;">비밀번호를 잊어버리셨나요?</button>
