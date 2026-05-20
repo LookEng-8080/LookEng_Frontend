@@ -19,13 +19,18 @@ async function loadProgress() {
     if (!res?.success) return;
     const { level, memorizedWords, totalWords, wordsToNextLevel } = res.data;
 
-    document.getElementById('levelBadge').textContent = `Lv.${level}`;
+    const badge = document.getElementById('levelBadge');
+    badge.textContent = `Lv.${level}`;
+    badge.dataset.level = level;
+
     document.getElementById('levelMemorized').textContent = `암기완료 ${memorizedWords} / ${totalWords}`;
     document.getElementById('levelNext').textContent =
       level >= 5 ? '최고 등급 달성! 🎉' : `다음 등급까지 ${wordsToNextLevel}개`;
 
     const pct = totalWords > 0 ? Math.round((memorizedWords / totalWords) * 100) : 0;
-    document.getElementById('levelProgressFill').style.width = `${pct}%`;
+    const fill = document.getElementById('levelProgressFill');
+    fill.style.width = `${pct}%`;
+    fill.dataset.level = level;
   } catch {
     // 조용히 무시 (대시보드 다른 기능에 영향 없게)
   }
