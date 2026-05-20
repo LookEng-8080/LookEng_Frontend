@@ -1,4 +1,4 @@
-import { WordApi, UserWordApi } from '../api.js';
+import { WordApi, UserWordApi, ProgressApi } from '../api.js';
 import { auth } from '../auth.js';
 import { showToast, buildSidebar, renderPagination, getPosClass } from '../utils.js';
 
@@ -24,6 +24,9 @@ let currentSort    = 'english,asc';
 let totalElements  = 0;
 let memorizedCount = 0;
 let currentFilter  = 'all'; // 'all' | 'bookmarked' | 'memorized'
+let currentLevel       = 1;
+let wordsToNextLevel   = 0;
+let prevMemorizedCount = 0;
 let filteredWords  = [];
 let searchKeyword  = '';
 let searchDebounce = null;
@@ -33,11 +36,79 @@ const searchInput = document.getElementById('searchInput');
 const searchClear = document.getElementById('searchClear');
 const sortSelect  = document.getElementById('sortSelect');
 
+// ── 숫자 카운트업 애니메이션 ─────────────────────────────────
+function animateCount(fromVal, toVal) {
+  const countEl = document.getElementById('progressCount');
+  const duration = 600;
+  const startTime = Date.now();
+  const tick = () => {
+    const elapsed = Date.now() - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    const current = Math.round(fromVal + (toVal - fromVal) * eased);
+    countEl.textContent = `암기완료 ${current} / ${totalElements}`;
+    if (t < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      prevMemorizedCount = toVal;
+    }
+  };
+  requestAnimationFrame(tick);
+}
+
+// ── 레벨업 토스트 배너 ────────────────────────────────────────
+function showLevelUpToast(newLevel) {
+  const existing = document.querySelector('.levelup-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'levelup-toast';
+  toast.innerHTML = `🎉 레벨 업! <strong>Lv.${newLevel}</strong> 달성!`;
+  document.body.appendChild(toast);
+
+  // 두 프레임 뒤에 show 클래스 적용 (transition 동작을 위해)
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('levelup-toast--show')));
+
+  setTimeout(() => {
+    toast.classList.remove('levelup-toast--show');
+    setTimeout(() => toast.remove(), 450);
+  }, 3000);
+}
+
+// ── 폭죽 (canvas-confetti) ────────────────────────────────────
+function triggerConfetti() {
+  if (typeof confetti === 'undefined') return;
+
+  // 1. 중앙 폭발
+  confetti({
+    particleCount: 180,
+    spread: 100,
+    origin: { y: 0.35 },
+    colors: ['#60A5FA', '#3B82F6', '#FBBF24', '#F472B6', '#34D399'],
+  });
+
+  // 2. 0.3초 후 좌우 동시 발사
+  setTimeout(() => {
+    confetti({ particleCount: 80, angle: 60,  spread: 55, origin: { x: 0 } });
+    confetti({ particleCount: 80, angle: 120, spread: 55, origin: { x: 1 } });
+  }, 300);
+}
+
 // ── 진도 바 ──────────────────────────────────────────────────
-function updateProgress() {
+function updateProgress(animate = false) {
   const pct = totalElements > 0 ? Math.round((memorizedCount / totalElements) * 100) : 0;
   document.getElementById('progressFill').style.width = `${pct}%`;
-  document.getElementById('progressCount').textContent = `암기완료 ${memorizedCount} / ${totalElements}`;
+
+  if (animate) {
+    animateCount(prevMemorizedCount, memorizedCount);
+  } else {
+    document.getElementById('progressCount').textContent = `암기완료 ${memorizedCount} / ${totalElements}`;
+    prevMemorizedCount = memorizedCount;
+  }
+
+  document.getElementById('progressLevel').textContent = `Lv.${currentLevel}`;
+  document.getElementById('progressNext').textContent =
+    currentLevel >= 5 ? '최고 등급 달성! 🎉' : `다음 등급까지 ${wordsToNextLevel}개`;
 }
 
 // ── 전체 단어 로드 (페이지네이션) ────────────────────────────
@@ -303,9 +374,24 @@ async function toggleMemorized(wordId) {
 
     const isMemorized = res.data.isMemorized;
 
-    // 1. 진도 카운트 업데이트
-    memorizedCount += isMemorized ? 1 : -1;
-    updateProgress();
+    // 1. 진도 카운트 업데이트 (API에서 최신 level 포함 재조회)
+    const oldLevel = currentLevel;
+    const progressRes = await ProgressApi.getProgress();
+    prevMemorizedCount = memorizedCount;
+    if (progressRes?.success) {
+      memorizedCount   = progressRes.data.memorizedWords;
+      currentLevel     = progressRes.data.level;
+      wordsToNextLevel = progressRes.data.wordsToNextLevel;
+    } else {
+      memorizedCount += isMemorized ? 1 : -1;
+    }
+    updateProgress(true);
+
+    // 2. 레벨업 감지 → 폭죽 + 토스트
+    if (currentLevel > oldLevel) {
+      showLevelUpToast(currentLevel);
+      triggerConfetti();
+    }
 
     // 2. 카드 UI 업데이트
     const wrapper = document.querySelector(`.word-card-wrapper[data-word-id="${wordId}"]`);
@@ -433,10 +519,10 @@ sortSelect.addEventListener('change', (e) => {
 
 // ── 초기 로드 ─────────────────────────────────────────────────
 async function init() {
-  // 1. 단어 목록과 암기완료 목록을 병렬 조회
-  const [wordsRes, memorizedRes] = await Promise.all([
+  // 1. 단어 목록과 진도 정보를 병렬 조회
+  const [wordsRes, progressRes] = await Promise.all([
     WordApi.getList(0, PAGE_SIZE, currentSort).catch(() => null),
-    auth.isAdmin() ? Promise.resolve(null) : UserWordApi.getMemorized().catch(() => null),
+    auth.isAdmin() ? Promise.resolve(null) : ProgressApi.getProgress().catch(() => null),
   ]);
 
   if (!wordsRes || !wordsRes.success) {
@@ -446,7 +532,12 @@ async function init() {
 
   const { content, totalElements: total, totalPages } = wordsRes.data;
   totalElements = total;
-  memorizedCount = memorizedRes?.success ? (memorizedRes.data || []).length : 0;
+  if (progressRes?.success) {
+    memorizedCount     = progressRes.data.memorizedWords;
+    currentLevel       = progressRes.data.level;
+    wordsToNextLevel   = progressRes.data.wordsToNextLevel;
+    prevMemorizedCount = memorizedCount;
+  }
 
   document.getElementById('totalCount').textContent = `총 ${total}개`;
   renderWordGrid(content);

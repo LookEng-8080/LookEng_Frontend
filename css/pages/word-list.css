@@ -156,38 +156,119 @@
   margin-bottom: 24px;
   box-shadow: var(--shadow-sm);
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.progress-section__header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
 }
 
 .progress-section__label {
-  font-size: 0.875rem;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
+.progress-level-badge {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-blue-primary, #4A90E2);
+  background: #EBF4FF;
+  padding: 4px 14px;
+  border-radius: 999px;
+}
+
+/* 진도 바 */
 .progress-bar {
-  flex: 1;
-  min-width: 160px;
-  height: 8px;
+  position: relative;
+  width: 100%;
+  height: 12px;
   background: var(--color-bg);
   border-radius: 99px;
   overflow: hidden;
 }
 
+/* 쉬머 애니메이션 */
+@keyframes shimmer {
+  0%   { background-position: -300% center; }
+  100% { background-position: 300% center; }
+}
+
 .progress-bar__fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-blue-primary), var(--color-navy-light));
+  background: linear-gradient(
+    90deg,
+    #3B82F6 0%,
+    #60A5FA 35%,
+    #93C5FD 50%,
+    #60A5FA 65%,
+    #3B82F6 100%
+  );
+  background-size: 300% 100%;
   border-radius: 99px;
-  transition: width 0.4s ease;
+  animation: shimmer 3s ease-in-out infinite;
+  transition: width 0.5s ease;
+}
+
+/* 레벨 구간 마커 (흰 눈금선) */
+.progress-bar__marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.75);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.progress-section__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .progress-section__count {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--color-text-primary);
   white-space: nowrap;
+}
+
+.progress-section__next {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* 레벨업 토스트 */
+.levelup-toast {
+  position: fixed;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120px);
+  background: linear-gradient(135deg, #1D4ED8, #1E3A8A);
+  color: #fff;
+  padding: 16px 36px;
+  border-radius: 999px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 8px 32px rgba(30, 58, 138, 0.45);
+  z-index: 9999;
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.levelup-toast--show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
 }
 
 /* 컨트롤 바 */

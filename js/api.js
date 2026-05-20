@@ -219,6 +219,13 @@ export const UserWordApi = {
   },
 };
 
+// ── Progress API ──────────────────────────────────────────────
+export const ProgressApi = {
+  getProgress() {
+    return request('GET', '/api/v1/user/progress');
+  },
+};
+
 // ── Admin API ─────────────────────────────────────────────────
 export const AdminApi = {
   getUsers() {

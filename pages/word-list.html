@@ -21,11 +21,21 @@
 
       <!-- 학습 진도 바 -->
       <div class="progress-section">
-        <span class="progress-section__label">학습 진도</span>
+        <div class="progress-section__header">
+          <span class="progress-section__label">학습 진도</span>
+          <span class="progress-level-badge" id="progressLevel">Lv.1</span>
+        </div>
         <div class="progress-bar">
           <div class="progress-bar__fill" id="progressFill" style="width: 0%"></div>
+          <span class="progress-bar__marker" style="left:20%"></span>
+          <span class="progress-bar__marker" style="left:40%"></span>
+          <span class="progress-bar__marker" style="left:60%"></span>
+          <span class="progress-bar__marker" style="left:80%"></span>
         </div>
-        <span class="progress-section__count" id="progressCount">암기완료 0 / 0</span>
+        <div class="progress-section__footer">
+          <span class="progress-section__count" id="progressCount">암기완료 0 / 0</span>
+          <span class="progress-section__next" id="progressNext">다음 등급까지 10개</span>
+        </div>
       </div>
 
       <!-- 검색창 -->
@@ -70,6 +80,7 @@
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script type="module" src="../js/pages/word-list.js"></script>
 </body>
 </html>
