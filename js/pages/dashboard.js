@@ -1,4 +1,4 @@
-import { TestApi, AuthApi } from '../api.js';
+import { TestApi, AuthApi, ProgressApi } from '../api.js';
 import { auth } from '../auth.js';
 import { showToast, buildSidebar } from '../utils.js';
 
@@ -10,6 +10,24 @@ function renderUserName() {
   const nameDisplay = document.getElementById('userName');
   if (nameDisplay) {
     nameDisplay.textContent = email.split('@')[0];
+  }
+}
+
+async function loadProgress() {
+  try {
+    const res = await ProgressApi.getProgress();
+    if (!res?.success) return;
+    const { level, memorizedWords, totalWords, wordsToNextLevel } = res.data;
+
+    document.getElementById('levelBadge').textContent = `Lv.${level}`;
+    document.getElementById('levelMemorized').textContent = `암기완료 ${memorizedWords} / ${totalWords}`;
+    document.getElementById('levelNext').textContent =
+      level >= 5 ? '최고 등급 달성! 🎉' : `다음 등급까지 ${wordsToNextLevel}개`;
+
+    const pct = totalWords > 0 ? Math.round((memorizedWords / totalWords) * 100) : 0;
+    document.getElementById('levelProgressFill').style.width = `${pct}%`;
+  } catch {
+    // 조용히 무시 (대시보드 다른 기능에 영향 없게)
   }
 }
 
@@ -156,5 +174,6 @@ function bindTooltipEvents() {
 
 document.addEventListener('DOMContentLoaded', () => {
   renderUserName();
+  loadProgress();
   loadGrassCalendarData();
 });

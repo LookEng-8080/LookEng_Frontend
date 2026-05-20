@@ -1,4 +1,4 @@
-import { WordApi, UserWordApi } from '../api.js';
+import { WordApi, UserWordApi, ProgressApi } from '../api.js';
 import { auth } from '../auth.js';
 import { showToast, buildSidebar, renderPagination, getPosClass } from '../utils.js';
 
@@ -24,6 +24,8 @@ let currentSort    = 'english,asc';
 let totalElements  = 0;
 let memorizedCount = 0;
 let currentFilter  = 'all'; // 'all' | 'bookmarked' | 'memorized'
+let currentLevel       = 1;
+let wordsToNextLevel   = 0;
 let filteredWords  = [];
 let searchKeyword  = '';
 let searchDebounce = null;
@@ -38,6 +40,9 @@ function updateProgress() {
   const pct = totalElements > 0 ? Math.round((memorizedCount / totalElements) * 100) : 0;
   document.getElementById('progressFill').style.width = `${pct}%`;
   document.getElementById('progressCount').textContent = `암기완료 ${memorizedCount} / ${totalElements}`;
+  document.getElementById('progressLevel').textContent = `Lv.${currentLevel}`;
+  document.getElementById('progressNext').textContent =
+    currentLevel >= 5 ? '최고 등급 달성! 🎉' : `다음 등급까지 ${wordsToNextLevel}개`;
 }
 
 // ── 전체 단어 로드 (페이지네이션) ────────────────────────────
@@ -303,8 +308,15 @@ async function toggleMemorized(wordId) {
 
     const isMemorized = res.data.isMemorized;
 
-    // 1. 진도 카운트 업데이트
-    memorizedCount += isMemorized ? 1 : -1;
+    // 1. 진도 카운트 업데이트 (API에서 최신 level 포함 재조회)
+    const progressRes = await ProgressApi.getProgress();
+    if (progressRes?.success) {
+      memorizedCount   = progressRes.data.memorizedWords;
+      currentLevel     = progressRes.data.level;
+      wordsToNextLevel = progressRes.data.wordsToNextLevel;
+    } else {
+      memorizedCount += isMemorized ? 1 : -1;
+    }
     updateProgress();
 
     // 2. 카드 UI 업데이트
@@ -433,10 +445,10 @@ sortSelect.addEventListener('change', (e) => {
 
 // ── 초기 로드 ─────────────────────────────────────────────────
 async function init() {
-  // 1. 단어 목록과 암기완료 목록을 병렬 조회
-  const [wordsRes, memorizedRes] = await Promise.all([
+  // 1. 단어 목록과 진도 정보를 병렬 조회
+  const [wordsRes, progressRes] = await Promise.all([
     WordApi.getList(0, PAGE_SIZE, currentSort).catch(() => null),
-    auth.isAdmin() ? Promise.resolve(null) : UserWordApi.getMemorized().catch(() => null),
+    auth.isAdmin() ? Promise.resolve(null) : ProgressApi.getProgress().catch(() => null),
   ]);
 
   if (!wordsRes || !wordsRes.success) {
@@ -446,7 +458,11 @@ async function init() {
 
   const { content, totalElements: total, totalPages } = wordsRes.data;
   totalElements = total;
-  memorizedCount = memorizedRes?.success ? (memorizedRes.data || []).length : 0;
+  if (progressRes?.success) {
+    memorizedCount   = progressRes.data.memorizedWords;
+    currentLevel     = progressRes.data.level;
+    wordsToNextLevel = progressRes.data.wordsToNextLevel;
+  }
 
   document.getElementById('totalCount').textContent = `총 ${total}개`;
   renderWordGrid(content);
