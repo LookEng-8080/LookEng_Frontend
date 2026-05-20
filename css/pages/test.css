@@ -353,6 +353,15 @@
 .quiz-word-card__word    { font-size: 2.25rem; font-weight: 800; font-family: var(--font-en); line-height: 1.1; }
 .quiz-word-card__sentence { font-size: 0.875rem; color: rgba(255,255,255,0.55); font-style: italic; max-width: 480px; line-height: 1.5; }
 
+/* FILL_IN_BLANK — 예문을 메인으로 강조 */
+.quiz-word-card--fib .quiz-word-card__sentence {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.9);
+  font-style: normal;
+  line-height: 1.7;
+  max-width: 520px;
+}
+
 /* 주관식 입력 */
 .quiz-instruction {
   font-size: 0.875rem;
