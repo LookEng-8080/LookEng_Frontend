@@ -113,6 +113,11 @@ export const AuthApi = {
       newPassword 
     });
   },
+  
+  // --- 구글 소셜 로그인 ---
+  socialLogin(idToken) {
+    return request('POST', '/api/v1/auth/social', { idToken });
+  },
 };
 
 // ── Word API ──────────────────────────────────────────────────

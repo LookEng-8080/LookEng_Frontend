@@ -257,3 +257,56 @@ resetConfirmForm?.addEventListener('submit', async (e) => {
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+
+// ======= 구글 소셜 로그인 로직 =======
+window.onload = function () {
+  // 구글 로그인 초기화
+  google.accounts.id.initialize({
+    // 백엔드(application.yml)에 입력한 구글 클라이언트 ID와 똑같은 값을 여기에 넣으세요.
+    client_id: "718119868998-f1okpb4888sjbq49836ic661jbn3p0tq.apps.googleusercontent.com",
+    callback: handleGoogleLogin
+  });
+
+  // 버튼 렌더링
+  const googleBtn = document.getElementById("googleLoginBtn");
+  if (googleBtn) {
+    google.accounts.id.renderButton(googleBtn, {
+      theme: "outline",
+      size: "large",
+      width: "350", // 폼 너비에 맞춰 조정
+      text: "signin_with"
+    });
+  }
+};
+
+// 구글 로그인 성공 후 백엔드 통신 및 리다이렉트 처리
+async function handleGoogleLogin(response) {
+  const idToken = response.credential; // 구글에서 발급한 JWT 토큰
+  const errorEl = document.getElementById('loginError');
+
+  try {
+    // API 통신
+    // API 통신 (api.js 활용)
+    const res = await AuthApi.socialLogin(idToken);
+
+    if (!res || !res.success) {
+      errorEl.textContent = res?.message || '구글 로그인에 실패했습니다.';
+      return;
+    }
+
+    // 성공 시 일반 로그인과 동일하게 세션 저장
+    const { role, userId, email } = res.data;
+    auth.saveSession({ role, userId, email });
+
+    showToast('구글 로그인에 성공했습니다!', 'success');
+
+    // 일반 로그인처럼 권한에 맞춰 단어장 페이지로 이동
+    if (role === 'ADMIN') {
+      location.replace('./admin/word-manage.html');
+    } else {
+      location.replace('./word-list.html');
+    }
+  } catch (error) {
+    showToast('네트워크 오류가 발생했습니다.', 'error');
+  }
+}
