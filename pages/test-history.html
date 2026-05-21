@@ -27,6 +27,7 @@
               <th>문제 수</th>
               <th>정답률</th>
               <th>소요 시간</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="historyBody"></tbody>
@@ -35,6 +36,32 @@
 
       <div class="pagination-wrapper" id="pagination"></div>
     </main>
+  </div>
+
+  <!-- 테스트 세션 상세 모달 -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal modal--detail">
+      <div class="modal__header">
+        <h2 class="modal__title" id="detailModalTitle">테스트 상세</h2>
+        <button class="modal__close" id="detailModalClose">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="detail-summary" id="detailSummary"></div>
+        <div class="test-history-table-wrapper" style="margin-top:16px">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th><th>영단어</th><th>뜻</th><th>내 답안</th><th>결과</th>
+              </tr>
+            </thead>
+            <tbody id="detailAnswerBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--primary" id="detailModalCloseBtn">닫기</button>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="../js/pages/test-history.js"></script>
