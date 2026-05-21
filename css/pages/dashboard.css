@@ -151,6 +151,17 @@
   gap: 24px;
 }
 
+a.feature-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+a.feature-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
 .feature-card__title {
   margin: 0 0 8px 0;
   font-size: 1.1rem;
