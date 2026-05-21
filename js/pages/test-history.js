@@ -34,7 +34,7 @@ function renderTable(records) {
   if (!records || records.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="5" class="empty-state">아직 테스트 기록이 없습니다.</td>
+        <td colspan="6" class="empty-state">아직 테스트 기록이 없습니다.</td>
       </tr>`;
     return;
   }
@@ -48,8 +48,19 @@ function renderTable(records) {
       <td>${r.totalCount}문제</td>
       <td><strong>${r.accuracy}%</strong></td>
       <td>${formatDuration(r.durationSec)}</td>
+      <td>
+        <button class="btn btn--ghost btn--sm detail-btn"
+                data-session-id="${r.sessionId}">상세</button>
+      </td>
     </tr>
   `).join('');
+
+  // 1. 이벤트 위임 — 상세 버튼 클릭 시 상세 페이지로 이동
+  tbody.addEventListener('click', e => {
+    const btn = e.target.closest('.detail-btn');
+    if (!btn) return;
+    location.href = `test-session-detail.html?id=${btn.dataset.sessionId}`;
+  });
 }
 
 loadHistory(0);

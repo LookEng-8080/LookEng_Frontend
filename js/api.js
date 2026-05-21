@@ -178,6 +178,10 @@ export const TestApi = {
   getHistory(page = 0, size = 10) {
     return request('GET', `/api/v1/test/sessions?page=${page}&size=${size}`);
   },
+
+  getSessionDetail(sessionId) {
+    return request('GET', `/api/v1/test/sessions/${sessionId}`);
+  },
 };
 
 // ── UserWord API ──────────────────────────────────────────────

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LookEng — 테스트 상세</title>
+  <link rel="stylesheet" href="../css/global.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/pages/word-list.css" />
+  <link rel="stylesheet" href="../css/pages/test.css" />
+</head>
+<body>
+  <div class="layout">
+    <div class="layout__sidebar" id="sidebar"></div>
+
+    <main class="layout__main">
+
+      <!-- 헤더: 뒤로가기 + 제목 -->
+      <div class="page-header">
+        <div class="detail-page-header">
+          <button class="btn btn--ghost btn--sm" id="backBtn">← 기록으로</button>
+          <h1 class="page-title">테스트 상세</h1>
+        </div>
+      </div>
+
+      <!-- 요약 카드 -->
+      <div class="detail-summary-card" id="summaryCard">
+        <div class="detail-stat">
+          <span class="detail-stat__label">날짜</span>
+          <span class="detail-stat__value" id="statDate">—</span>
+        </div>
+        <div class="detail-stat">
+          <span class="detail-stat__label">유형</span>
+          <span class="detail-stat__value" id="statType">—</span>
+        </div>
+        <div class="detail-stat">
+          <span class="detail-stat__label">문제 수</span>
+          <span class="detail-stat__value" id="statTotal">—</span>
+        </div>
+        <div class="detail-stat">
+          <span class="detail-stat__label">정답</span>
+          <span class="detail-stat__value detail-stat__value--correct" id="statCorrect">—</span>
+        </div>
+        <div class="detail-stat">
+          <span class="detail-stat__label">오답</span>
+          <span class="detail-stat__value detail-stat__value--wrong" id="statIncorrect">—</span>
+        </div>
+        <div class="detail-stat">
+          <span class="detail-stat__label">소요 시간</span>
+          <span class="detail-stat__value" id="statDuration">—</span>
+        </div>
+      </div>
+
+      <!-- 전체 답안 테이블 -->
+      <section class="detail-answers-section">
+        <h2 class="detail-answers-section__title">전체 답안</h2>
+        <div class="test-history-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>영단어</th>
+                <th>뜻</th>
+                <th>내 답</th>
+                <th>결과</th>
+              </tr>
+            </thead>
+            <tbody id="answersBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script type="module" src="../js/pages/test-session-detail.js"></script>
+</body>
+</html>

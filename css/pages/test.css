@@ -562,3 +562,95 @@
 .recent-history-box .session-row {
   grid-template-columns: 100px 72px 64px 1fr;
 }
+
+/* ── 테스트 상세 페이지 ── */
+
+/* 헤더: 뒤로가기 버튼 + 제목 */
+.detail-page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* 요약 카드 — 6칸 그리드 */
+.detail-summary-card {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+  background: var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 28px;
+}
+
+.detail-stat {
+  background: var(--color-surface);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.detail-stat__label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.detail-stat__value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.detail-stat__value--correct {
+  color: var(--color-success);
+}
+
+.detail-stat__value--wrong {
+  color: var(--color-danger);
+}
+
+/* 전체 답안 섹션 */
+.detail-answers-section {
+  margin-top: 8px;
+}
+
+.detail-answers-section__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 12px;
+}
+
+/* 정오답 배지 */
+.answer-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.answer-badge--correct {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.answer-badge--wrong {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+/* 반응형: 768px 이하에서 2열로 축소 */
+@media (max-width: 768px) {
+  .detail-summary-card {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
