@@ -550,6 +550,35 @@
   color: var(--color-text-muted);
 }
 
+/* ── 테스트 세션 상세 모달 ── */
+.modal--detail { max-width: 680px; }
+
+.detail-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 4px;
+}
+.detail-summary__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.detail-summary__label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+.detail-summary__value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.detail-summary__value--correct { color: var(--color-success); }
+.detail-summary__value--wrong   { color: var(--color-danger); }
+
 /* ── 하단 최근 기록: 타이틀 / 행 스타일 ── */
 .recent-history__title {
   font-size: 0.875rem;
