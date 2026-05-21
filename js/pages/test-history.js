@@ -49,7 +49,7 @@ function renderTable(records) {
       <td><strong>${r.accuracy}%</strong></td>
       <td>${formatDuration(r.durationSec)}</td>
       <td>
-        <button class="btn btn--sm btn--secondary detail-btn"
+        <button class="btn btn--sm btn--primary detail-btn"
                 data-session-id="${r.sessionId}">상세</button>
       </td>
     </tr>
