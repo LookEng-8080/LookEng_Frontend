@@ -1,4 +1,4 @@
-import { AdminApi } from '../../api.js';
+import { AdminApi, TestApi } from '../../api.js';
 import { auth } from '../../auth.js';
 import { showToast, buildSidebar, formatDate, formatDuration } from '../../utils.js';
 
@@ -9,13 +9,22 @@ auth.requireAdmin();
 buildSidebar('admin-quiz');
 
 // ── 상태 ─────────────────────────────────────────────────────
-const QUIZ_TYPE_LABEL = { SHORT_ANSWER: '주관식', MULTIPLE_CHOICE: '객관식' };
+const QUIZ_TYPE_LABEL = {
+  SHORT_ANSWER: '주관식',
+  MULTIPLE_CHOICE: '객관식',
+  FILL_IN_BLANK: '빈칸채우기',
+};
 
 // ── DOM 참조 ─────────────────────────────────────────────────
 const userGrid      = document.getElementById('userGrid');
 const sessionsModal = document.getElementById('sessionsModal');
 const modalUserName = document.getElementById('modalUserName');
 const sessionList   = document.getElementById('sessionList');
+
+const detailModal      = document.getElementById('detailModal');
+const detailModalTitle = document.getElementById('detailModalTitle');
+const detailSummary    = document.getElementById('detailSummary');
+const detailAnswerBody = document.getElementById('detailAnswerBody');
 
 // ── 유저 목록 로드 ────────────────────────────────────────────
 async function loadUsers() {
@@ -91,13 +100,84 @@ function renderSessionList(records) {
         <span class="session-row__count">${r.totalCount}문제</span>
         <span class="session-row__accuracy ${accuracyClass}">${r.accuracy}%</span>
         <span class="session-row__duration">${formatDuration(r.durationSec)}</span>
+        <button class="btn btn--sm btn--primary detail-btn"
+                data-session-id="${r.sessionId}">상세</button>
       </div>
     `;
   }).join('');
 }
 
+// ── 세션 상세 모달 오픈 ───────────────────────────────────────
+async function openDetailModal(sessionId) {
+  detailModalTitle.textContent = '불러오는 중…';
+  detailSummary.innerHTML = '';
+  detailAnswerBody.innerHTML = '<tr><td colspan="5" class="empty-state">불러오는 중…</td></tr>';
+  detailModal.classList.add('is-open');
+
+  try {
+    const res = await TestApi.getSessionDetail(sessionId);
+    if (!res || !res.success) {
+      showToast(res?.message || '상세 정보를 불러오지 못했습니다.', 'error');
+      closeDetailModal();
+      return;
+    }
+    renderDetailModal(res.data);
+  } catch {
+    showToast('네트워크 오류가 발생했습니다.', 'error');
+    closeDetailModal();
+  }
+}
+
+// ── 세션 상세 모달 렌더링 ─────────────────────────────────────
+function renderDetailModal(data) {
+  detailModalTitle.textContent =
+    `${formatDate(data.createdAt)} — ${QUIZ_TYPE_LABEL[data.quizType] ?? data.quizType}`;
+
+  detailSummary.innerHTML = `
+    <div class="detail-summary__item">
+      <span class="detail-summary__label">유형</span>
+      <span class="detail-summary__value">
+        <span class="session-row__type">${QUIZ_TYPE_LABEL[data.quizType] ?? data.quizType}</span>
+      </span>
+    </div>
+    <div class="detail-summary__item">
+      <span class="detail-summary__label">점수</span>
+      <span class="detail-summary__value">${data.score} / ${data.totalQuestions}</span>
+    </div>
+    <div class="detail-summary__item">
+      <span class="detail-summary__label">정답</span>
+      <span class="detail-summary__value detail-summary__value--correct">${data.correctCount}</span>
+    </div>
+    <div class="detail-summary__item">
+      <span class="detail-summary__label">오답</span>
+      <span class="detail-summary__value detail-summary__value--wrong">${data.incorrectCount}</span>
+    </div>
+  `;
+
+  if (!data.answers?.length) {
+    detailAnswerBody.innerHTML = '<tr><td colspan="5" class="empty-state">답안 데이터가 없습니다.</td></tr>';
+    return;
+  }
+
+  detailAnswerBody.innerHTML = data.answers.map(a => `
+    <tr>
+      <td>${a.sequence}</td>
+      <td class="en">${a.english}</td>
+      <td>${a.korean}</td>
+      <td class="${a.correct ? '' : 'wrong-answer'}">${a.userAnswer ?? '(미입력)'}</td>
+      <td>${a.correct
+        ? '<span style="color:var(--color-success);font-weight:700">✓</span>'
+        : '<span style="color:var(--color-danger);font-weight:700">✗</span>'}</td>
+    </tr>
+  `).join('');
+}
+
 // ── 모달 닫기 ─────────────────────────────────────────────────
-function closeModal() {
+function closeDetailModal() {
+  detailModal.classList.remove('is-open');
+}
+
+function closeSessionModal() {
   sessionsModal.classList.remove('is-open');
 }
 
@@ -110,17 +190,35 @@ userGrid.addEventListener('click', (e) => {
   openSessionModal(Number(card.dataset.userId), card.dataset.userName);
 });
 
-document.getElementById('modalClose').addEventListener('click', closeModal);
-document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-
-// 오버레이 클릭 시 닫기
-sessionsModal.addEventListener('click', (e) => {
-  if (e.target === sessionsModal) closeModal();
+// 세션 목록 → 상세 버튼 클릭 (이벤트 위임)
+sessionList.addEventListener('click', (e) => {
+  const btn = e.target.closest('.detail-btn');
+  if (!btn) return;
+  openDetailModal(Number(btn.dataset.sessionId));
 });
 
-// ESC 키 닫기
+// 세션 모달 닫기
+document.getElementById('modalClose').addEventListener('click', closeSessionModal);
+document.getElementById('modalCloseBtn').addEventListener('click', closeSessionModal);
+sessionsModal.addEventListener('click', (e) => {
+  if (e.target === sessionsModal) closeSessionModal();
+});
+
+// 상세 모달 닫기
+document.getElementById('detailModalClose').addEventListener('click', closeDetailModal);
+document.getElementById('detailModalCloseBtn').addEventListener('click', closeDetailModal);
+detailModal.addEventListener('click', (e) => {
+  if (e.target === detailModal) closeDetailModal();
+});
+
+// ESC 키: 상세 모달 열려 있으면 상세만, 아니면 세션 모달 닫기
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeModal();
+  if (e.key !== 'Escape') return;
+  if (detailModal.classList.contains('is-open')) {
+    closeDetailModal();
+  } else {
+    closeSessionModal();
+  }
 });
 
 // ── 초기 로드 ────────────────────────────────────────────────

@@ -276,7 +276,17 @@
 
 /* ── 넓은 모달 (테스트 세션 기록 등) ── */
 .modal--wide {
-  max-width: 620px;
+  max-width: 680px;
+}
+
+/* 세션 목록 행: 상세 버튼 열 추가 */
+.session-list .session-row {
+  grid-template-columns: 90px 64px 60px 56px auto auto;
+}
+
+/* 세션 상세 모달 */
+.modal--detail {
+  max-width: 700px;
 }
 
 /* ── 품사 버튼 그룹 ── */
