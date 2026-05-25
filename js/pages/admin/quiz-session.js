@@ -1,4 +1,4 @@
-import { AdminApi, TestApi } from '../../api.js';
+import { AdminApi } from '../../api.js';
 import { auth } from '../../auth.js';
 import { showToast, buildSidebar, formatDate, formatDuration } from '../../utils.js';
 
@@ -115,7 +115,7 @@ async function openDetailModal(sessionId) {
   detailModal.classList.add('is-open');
 
   try {
-    const res = await TestApi.getSessionDetail(sessionId);
+    const res = await AdminApi.getSessionDetail(sessionId);
     if (!res || !res.success) {
       showToast(res?.message || '상세 정보를 불러오지 못했습니다.', 'error');
       closeDetailModal();

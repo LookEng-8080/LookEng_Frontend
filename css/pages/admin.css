@@ -281,7 +281,7 @@
 
 /* 세션 목록 행: 상세 버튼 열 추가 */
 .session-list .session-row {
-  grid-template-columns: 90px 64px 60px 56px auto auto;
+  grid-template-columns: 90px 64px 60px 56px 1fr 72px;
 }
 
 /* 세션 상세 모달 */

@@ -239,4 +239,8 @@ export const AdminApi = {
   getUserSessions(userId, page = 0, size = 10) {
     return request('GET', `/api/v1/admin/users/${userId}/test-sessions?page=${page}&size=${size}`);
   },
+
+  getSessionDetail(sessionId) {
+    return request('GET', `/api/v1/admin/test-sessions/${sessionId}`);
+  },
 };
