@@ -66,16 +66,12 @@ API 호출
 ## 개발 환경 실행
 
 ```bash
-# 1. VS Code Live Server 사용 (권장)
-#    index.html 열기 → 우하단 "Go Live" → http://127.0.0.1:5500
+# 1. npx serve -l 3000 (권장)
 
 # 2. 백엔드 동시 실행 (별도 터미널)
 cd ../LookEng_Backend
 ./gradlew bootRun    # http://localhost:8080
 ```
-
-> CORS: 백엔드 SecurityConfig에 `http://127.0.0.1:5500`과 `http://localhost:5500`이 허용 목록에 포함되어 있다.
-
 ---
 
 ## PR / 이슈 이력 요약
